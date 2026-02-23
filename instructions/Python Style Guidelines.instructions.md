@@ -25,11 +25,13 @@ When providing Python code that is longer than one line, follow these guidelines
 #### Example 1: Function Call with Multiple Arguments
 
 **Before:**
+
 ```python
 result = some_function(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
 ```
 
 **After:**
+
 ```python
 result = some_function(
     arg1,
@@ -46,11 +48,13 @@ result = some_function(
 #### Example 2: Dictionary Definition
 
 **Before:**
+
 ```python
 config = {'location': 'eastus', 'vm_size': 'Standard_D2s_v3', 'admin_username': 'azureuser', 'enable_monitoring': True}
 ```
 
 **After:**
+
 ```python
 config = {
     'location': 'eastus',
@@ -63,11 +67,13 @@ config = {
 #### Example 3: Method Chaining
 
 **Before:**
+
 ```python
 df = pd.read_csv('data.csv').dropna().groupby('category').agg({'value': 'sum'}).reset_index()
 ```
 
 **After:**
+
 ```python
 df = (
     pd.read_csv('data.csv')
@@ -81,11 +87,13 @@ df = (
 #### Example 4: List Comprehension
 
 **Before:**
+
 ```python
 results = [process_item(item, param1=value1, param2=value2, param3=value3) for item in items if item.is_valid()]
 ```
 
 **After:**
+
 ```python
 results = [
     process_item(
@@ -108,8 +116,6 @@ results = [
 - **Use meaningful indentation** (4 spaces per level)
 - **Place opening parentheses/brackets on the same line** and closing ones aligned with the opening construct
 - **Use trailing commas** in multi-line collections for cleaner diffs
-
-
 
 ## General Program Structure
 
@@ -185,13 +191,13 @@ if __name__ == "__main__":
 
 * Use descriptive function names with clear verb-noun structure (e.g., `get_data`, `process_file`, `validate_input`).
 * Keep function names in snake_case with the noun part singular (e.g., use `get_item` instead of `get_items`).
-	* Common verb mappings:
-		* retrieve/fetch → `get_`
-		* validate/check → `validate_` or `check_`
-		* display/output → `show_` or `display_`
-		* create/build → `create_` or `build_`
-		* update/modify → `update_` or `modify_`
-		* delete/remove → `delete_` or `remove_`
+  * Common verb mappings:
+    * retrieve/fetch → `get_`
+    * validate/check → `validate_` or `check_`
+    * display/output → `show_` or `display_`
+    * create/build → `create_` or `build_`
+    * update/modify → `update_` or `modify_`
+    * delete/remove → `delete_` or `remove_`
 * When displaying output, use the verb `show` or `display` instead of `format`.
 * Prefer explicit imports over wildcard imports (`from module import *` is discouraged).
 * Group imports in the following order:
