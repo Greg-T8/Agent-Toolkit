@@ -16,19 +16,19 @@ This skill is designed to be **idempotent**: running it repeatedly should result
 ## Examples
 
 - Input: `https://learn.microsoft.com/en-us/powershell/module/az.compute/grant-azdiskaccess?view=azps-15.3.0`  
-  Output: `[Grant-AzDiskAccess](https://learn.microsoft.com/en-us/powershell/module/az.compute/grant-azdiskaccess?view=azps-15.3.0)`
+  Output: `- [Grant-AzDiskAccess](https://learn.microsoft.com/en-us/powershell/module/az.compute/grant-azdiskaccess?view=azps-15.3.0)`
 
 - Input (PowerShell parameter section):  
   `https://learn.microsoft.com/en-us/powershell/module/az.compute/new-azdiskupdateconfig?view=azps-15.3.0#-architecture`  
-  Output: `[New-AzDiskUpdateConfig - Architecture](https://learn.microsoft.com/en-us/powershell/module/az.compute/new-azdiskupdateconfig?view=azps-15.3.0#-architecture)`
+  Output: `- [New-AzDiskUpdateConfig - Architecture](https://learn.microsoft.com/en-us/powershell/module/az.compute/new-azdiskupdateconfig?view=azps-15.3.0#-architecture)`
 
 - Input (Learn heading section):  
   `https://learn.microsoft.com/en-us/azure/reliability/reliability-vmware-solution?pivots=avs-gen1#resilience-to-availability-zone-failures`  
-  Output: `[Reliability VMware Solution - Resilience to Availability Zone Failures](https://learn.microsoft.com/en-us/azure/reliability/reliability-vmware-solution?pivots=avs-gen1#resilience-to-availability-zone-failures)`
+  Output: `- [Reliability VMware Solution - Resilience to Availability Zone Failures](https://learn.microsoft.com/en-us/azure/reliability/reliability-vmware-solution?pivots=avs-gen1#resilience-to-availability-zone-failures)`
 
 - Input (autolink):  
   `<https://learn.microsoft.com/en-us/powershell/module/az.compute/set-azdisksecurityprofile?view=azps-15.3.0#-securevmdiskencryptionset>`  
-  Output: `[Set-AzDiskSecurityProfile - SecureVMDiskEncryptionSet](https://learn.microsoft.com/en-us/powershell/module/az.compute/set-azdisksecurityprofile?view=azps-15.3.0#-securevmdiskencryptionset)`
+  Output: `- [Set-AzDiskSecurityProfile - SecureVMDiskEncryptionSet](https://learn.microsoft.com/en-us/powershell/module/az.compute/set-azdisksecurityprofile?view=azps-15.3.0#-securevmdiskencryptionset)`
 
 ---
 
@@ -57,7 +57,7 @@ This skill is designed to be **idempotent**: running it repeatedly should result
    - Do not “improve” existing link text. If it’s already friendly, leave it as-is.
 
 3. **Autolinks**
-   - Convert `<https://...>` to `[Friendly](https://...)` by removing `<` and `>`.
+   - Convert `<https://...>` to `- [Friendly](https://...)` by removing `<` and `>`.
 
 4. **Do not alter URLs**
    - Keep the URL exactly the same inside `( … )`, including query strings and fragments.
@@ -199,7 +199,7 @@ If `frag` is empty or clearly non-semantic (`top`, `overview`), do not append `-
    - Confirm rerunning would find zero eligible raw URLs.
 
 3. **Structural check**
-   - For each converted link, ensure it matches: `[LABEL](URL)`
+   - For each converted link, ensure it matches: `- [LABEL](URL)`
    - Ensure `URL` exactly equals the original matched URL (including `?` and `#`).
    - Ensure you did not swallow trailing punctuation (e.g., periods should remain outside the `)`).
 
