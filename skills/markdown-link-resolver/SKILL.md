@@ -61,6 +61,8 @@ This skill is designed to be **idempotent**: running it repeatedly should result
 
 4. **Do not alter URLs**
    - Keep the URL exactly the same inside `( … )`, including query strings and fragments.
+   - Exception: Remove ChatGPT tracking query parameters (e.g., `?utm_source=chatgpt.com`).
+     - Example: `https://learn.microsoft.com/en-us/azure/load-balancer/skus?utm_source=chatgpt.com` → stored as `https://learn.microsoft.com/en-us/azure/load-balancer/skus`
 
 5. **Do not touch code fences**
    - Do not convert URLs inside triple-backtick blocks unless the user explicitly asked.

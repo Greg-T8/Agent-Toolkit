@@ -4,5 +4,10 @@
 			"path": "."
 		}
   ],
-  "settings": {}
+	"settings": {
+		"workbench.colorCustomizations": {
+			"titleBar.activeBackground": "#0D0332",
+			"titleBar.inactiveBackground": "#090223"
+		}
+	}
 }

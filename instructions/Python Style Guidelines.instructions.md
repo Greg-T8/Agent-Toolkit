@@ -117,6 +117,41 @@ results = [
 - **Place opening parentheses/brackets on the same line** and closing ones aligned with the opening construct
 - **Use trailing commas** in multi-line collections for cleaner diffs
 
+### Collapsible Regions
+
+Use `#region` and `#endregion` comments to create foldable sections in editors that support region-based code folding.
+
+Guidance:
+
+1. Use regions to organize major sections such as imports, constants, main workflow, helper functions, and script entry point.
+2. Keep region names short, descriptive, and consistently formatted (UPPERCASE preferred).
+3. Do not overuse regions for tiny blocks; reserve them for meaningful navigation boundaries.
+4. Ensure each `#region` has a matching `#endregion`.
+
+Example:
+
+```python
+#region IMPORTS
+import json
+from pathlib import Path
+#endregion
+
+#region MAIN WORKFLOW
+def main() -> None:
+    data = get_data()
+    show_result(data)
+#endregion
+
+#region HELPER FUNCTIONS
+def get_data() -> dict:
+    return {'status': 'ok'}
+
+
+def show_result(data: dict) -> None:
+    print(data)
+#endregion
+```
+
 ## General Program Structure
 
 ```python
