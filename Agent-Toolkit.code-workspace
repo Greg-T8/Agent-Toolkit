@@ -1,13 +1,14 @@
 {
 	"folders": [
-		{
-			"path": "."
-		}
+    {
+      "path": "."
+    }
   ],
 	"settings": {
 		"workbench.colorCustomizations": {
 			"titleBar.activeBackground": "#1E90FF",
 			"titleBar.inactiveBackground": "#104E8B"
-		}
+    },
+    "powershell.cwd": "Agent-Toolkit"
 	}
 }
