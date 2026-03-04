@@ -9,7 +9,11 @@ argument-hint: '[file or selection]'
 
 ## Goal
 
-Convert one or more raw URLs in the selected text into **friendly Markdown links** while **preserving all surrounding formatting** (bullets, numbering, indentation, punctuation, spacing).
+Process the selected text to produce clean, consistently formatted Markdown links:
+
+1. **Convert raw URLs** into `[Friendly Label](URL)` links.
+2. **Promote standalone links** — any line whose sole content is a Markdown link (whether newly converted or pre-existing) must be a bullet item (`- [Label](URL)`).
+3. **Collapse spacing** between consecutive standalone bullet links so they form a tight, unspaced list.
 
 This skill is designed to be **idempotent**: running it repeatedly should result in **no further changes** after the first successful pass.
 
@@ -29,6 +33,21 @@ This skill is designed to be **idempotent**: running it repeatedly should result
 - Input (autolink):  
   `<https://learn.microsoft.com/en-us/powershell/module/az.compute/set-azdisksecurityprofile?view=azps-15.3.0#-securevmdiskencryptionset>`  
   Output: `- [Set-AzDiskSecurityProfile - SecureVMDiskEncryptionSet](https://learn.microsoft.com/en-us/powershell/module/az.compute/set-azdisksecurityprofile?view=azps-15.3.0#-securevmdiskencryptionset)`
+
+- Input (pre-existing formatted links, missing bullets and separated by blank lines):  
+
+  ```
+  [Blob Storage Monitoring Scenarios](https://learn.microsoft.com/en-us/azure/storage/blobs/blob-storage-monitoring-scenarios)
+
+  [Storage Insights Overview](https://learn.microsoft.com/en-us/azure/storage/common/storage-insights-overview)
+  ```  
+
+  Output:  
+
+  ```
+  - [Blob Storage Monitoring Scenarios](https://learn.microsoft.com/en-us/azure/storage/blobs/blob-storage-monitoring-scenarios)
+  - [Storage Insights Overview](https://learn.microsoft.com/en-us/azure/storage/common/storage-insights-overview)
+  ```
 
 ---
 
@@ -51,10 +70,12 @@ This skill is designed to be **idempotent**: running it repeatedly should result
 1. **Preserve formatting exactly**
    - Do not change bullets, numbering, indentation, whitespace, or line breaks.
    - Only replace the URL substring itself.
+   - **Exception — standalone URL lines:** If a line contains *only* a raw URL (optionally wrapped in `<...>`) with no surrounding text, you **must** prepend `-` to make it a bullet item. This overrides the preserve-whitespace rule for that line.
 
 2. **Idempotency (critical)**
-   - If a URL is already in a Markdown link `[text](url)`, do nothing to that link.
-   - Do not “improve” existing link text. If it’s already friendly, leave it as-is.
+   - If a URL is already inside a Markdown link `[text](url)`, do **not** re-fetch or re-derive its label, and do **not** alter the URL.
+   - Do not "improve" existing link text. If it's already friendly, leave it as-is.
+   - **Important:** idempotency applies only to label text and URLs. Formatting corrections (bullet promotion and blank-line collapsing) **must still be applied** to pre-existing `[text](url)` lines that are missing a bullet or separated by blank lines.
 
 3. **Autolinks**
    - Convert `<https://...>` to `- [Friendly](https://...)` by removing `<` and `>`.
@@ -67,6 +88,10 @@ This skill is designed to be **idempotent**: running it repeatedly should result
 5. **Do not touch code fences**
    - Do not convert URLs inside triple-backtick blocks unless the user explicitly asked.
 
+6. **Collapse blank lines between consecutive standalone-link bullet items**
+   - After converting a block of consecutive standalone URL lines into `- [Label](URL)` bullets, remove any blank lines that existed between those items so they form a tight, unspaced list.
+   - Only collapse blank lines that are *between* two consecutive converted bullet lines; blank lines before the first or after the last item are left unchanged.
+
 ---
 
 ## Detection rules (stable + safe)
@@ -76,11 +101,13 @@ This skill is designed to be **idempotent**: running it repeatedly should result
 - `http://...` or `https://...`
 - optionally wrapped as `<https://...>`
 
-### What must be skipped
+### What must be skipped (conversion only)
+
+The following are skipped for **URL-to-label conversion only**. They are still subject to the standalone formatting pass (bullet promotion and blank-line collapsing).
 
 - Any URL already inside a Markdown link structure:
-  - Pattern to treat as “already converted”: `[...] ( ...URL... )` i.e., `[anything](URL)`
-- Any URL inside a fenced code block (``` ... ```)
+  - Pattern to treat as "already converted" for label purposes: `[anything](URL)`
+- Any URL inside a fenced code block (``` ... ```) — skip entirely, including formatting.
 
 ### Punctuation handling (avoid malformed links)
 
@@ -171,7 +198,7 @@ If `frag` is empty or clearly non-semantic (`top`, `overview`), do not append `-
 
 ---
 
-## Transformation procedure (two-pass to reduce errors)
+## Transformation procedure (three-pass to reduce errors)
 
 ### Pass 1: Analyze only (no edits yet)
 
@@ -180,28 +207,38 @@ If `frag` is empty or clearly non-semantic (`top`, `overview`), do not append `-
 3. For each remaining URL, compute its label (prefer `fetch_webpage`, else fallback inference).
 4. Build a list of *exact* replacements: `(old_substring -> new_substring)`.
 
-### Pass 2: Apply minimal replacements
+### Pass 2: Apply URL conversions
 
-1. Apply replacements from Pass 1 in a way that:
-   - Replaces only the URL substring (or `<URL>` substring for autolinks).
-   - Preserves all original surrounding characters and whitespace.
-2. Do not reformat or rewrap lines.
+1. Apply replacements from Pass 1:
+   - Replace only the URL substring (or `<URL>` substring for autolinks).
+   - For a standalone raw-URL line, replace the entire line with `- [Label](URL)`.
+   - Preserve all surrounding characters and whitespace for inline URLs.
+2. Do not reformat or rewrap any other lines.
+
+### Pass 3: Standalone link formatting (applies to ALL lines, including pre-existing)
+
+This pass runs **after** Pass 2 and is independent of whether any URL conversions occurred.
+
+1. **Bullet promotion** — For every line in the selection whose sole non-whitespace content is a Markdown link (`[anything](URL)`) and that does **not** already begin with a list marker (`-`, `*`, `+`, or a number), prepend `-` to the line.
+2. **Blank-line collapsing** — After bullet promotion, scan for runs of consecutive `- [...]( ...)` bullet lines that are separated only by blank lines. Remove those blank lines so the run forms a tight list. Do not collapse blank lines before the first item in a run or after the last item.
 
 ---
 
 ## Post-checks (must do before returning output)
 
 1. **No-op check**
-   - If there were zero eligible raw URLs to convert, return the selection unchanged.
+   - Do **not** return the selection unchanged just because there were zero raw URLs to convert. Pass 3 (standalone formatting) must still run.
+   - Return the selection unchanged only if both Pass 2 and Pass 3 produced zero changes.
 
 2. **Idempotency check**
-   - Confirm you did not modify any existing `[text](url)` links.
-   - Confirm rerunning would find zero eligible raw URLs.
+   - Confirm you did not alter the label text or URL of any existing `[text](url)` link.
+   - Confirm rerunning would find zero raw URLs to convert and zero lines needing bullet promotion or blank-line collapsing.
 
 3. **Structural check**
-   - For each converted link, ensure it matches: `- [LABEL](URL)`
-   - Ensure `URL` exactly equals the original matched URL (including `?` and `#`).
+   - For each converted link, ensure `URL` exactly equals the original matched URL (including `?` and `#`).
    - Ensure you did not swallow trailing punctuation (e.g., periods should remain outside the `)`).
+   - Ensure **every** line whose sole content is a Markdown link now begins with `-` (including pre-existing links).
+   - Ensure no blank lines remain between consecutive `- [...]( ...)` bullet items.
 
 ---
 
