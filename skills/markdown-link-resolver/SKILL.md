@@ -1,6 +1,6 @@
 ---
 name: markdown-link-resolver
-description: 'Resolve bare or untitled URLs in markdown files into proper markdown links with page titles. Use when asked to resolve links, add titles to URLs, fix bare links, or convert raw URLs to titled markdown links.'
+description: 'Resolve bare or untitled URLs in markdown files into proper markdown links with page titles. Also resolves plain-text page titles (display text without URLs) into full markdown links by searching for the correct URL. Use when asked to resolve links, add titles to URLs, fix bare links, convert raw URLs to titled markdown links, or convert page titles to links.'
 user-invokable: true
 argument-hint: '[file or selection]'
 ---
@@ -11,9 +11,10 @@ argument-hint: '[file or selection]'
 
 Process the selected text to produce clean, consistently formatted Markdown links:
 
-1. **Convert raw URLs** into `[Friendly Label](URL)` links.
-2. **Promote standalone links** — any line whose sole content is a Markdown link (whether newly converted or pre-existing) must be a bullet item (`- [Label](URL)`).
-3. **Collapse spacing** between consecutive standalone bullet links so they form a tight, unspaced list.
+1. **Resolve display text** — if lines contain no URLs but look like page titles, search for and resolve each title to its canonical URL.
+2. **Convert raw URLs** into `[Friendly Label](URL)` links.
+3. **Promote standalone links** — any line whose sole content is a Markdown link (whether newly converted or pre-existing) must be a bullet item (`- [Label](URL)`).
+4. **Collapse spacing** between consecutive standalone bullet links so they form a tight, unspaced list.
 
 This skill is designed to be **idempotent**: running it repeatedly should result in **no further changes** after the first successful pass.
 
@@ -49,6 +50,30 @@ This skill is designed to be **idempotent**: running it repeatedly should result
   - [Storage Insights Overview](https://learn.microsoft.com/en-us/azure/storage/common/storage-insights-overview)
   ```
 
+- Input (display text only — no URLs present):  
+
+  ```
+  Use Azure portal to export a template
+
+  Understand the structure and syntax of ARM templates
+
+  Azure Resource Manager deployment modes: COMPLETE versus INCREMENTAL
+
+  Azure Resource Manager deployment modes
+
+  Manage Azure resources by using Azure CLI
+  ```  
+
+  Output:  
+
+  ```
+  - [Use Azure portal to export a template](https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/export-template-portal)
+  - [Understand the structure and syntax of ARM templates](https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/syntax)
+  - [Azure Resource Manager deployment modes: COMPLETE versus INCREMENTAL](https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-modes)
+  - [Azure Resource Manager deployment modes](https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-modes)
+  - [Manage Azure resources by using Azure CLI](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resources-cli)
+  ```
+
 ---
 
 ## When to use
@@ -56,6 +81,7 @@ This skill is designed to be **idempotent**: running it repeatedly should result
 - Notes, README sections, or docs where raw URLs should become readable links.
 - Lists where you must not break bullet/number formatting.
 - Links to headings/sections where the label should include the section name.
+- Pasted lists of page titles (display text) that need to be converted into full markdown links.
 
 ## Selection expectations
 
@@ -95,6 +121,17 @@ This skill is designed to be **idempotent**: running it repeatedly should result
 ---
 
 ## Detection rules (stable + safe)
+
+### What counts as "display text" (title-only input)
+
+A line is treated as **display text** (a page title without a URL) when **all** of the following are true:
+
+1. The selection contains **zero** raw URLs (`http://…` or `https://…`) and **zero** existing Markdown links (`[…](…)`).
+2. The line is not blank and is not inside a fenced code block.
+3. The line does not already begin with a list marker followed by a Markdown link.
+4. The line reads like a human-readable page title — typically 3+ words, natural-language casing, may contain colons, hyphens, or other punctuation.
+
+When these conditions are met, the skill enters **display-text resolution mode** (see Pass 0 below).
 
 ### What counts as a “raw URL”
 
@@ -198,7 +235,28 @@ If `frag` is empty or clearly non-semantic (`top`, `overview`), do not append `-
 
 ---
 
-## Transformation procedure (three-pass to reduce errors)
+## Transformation procedure (four-pass to reduce errors)
+
+### Pass 0: Display-text resolution (conditional — runs only when no URLs are detected)
+
+This pass runs **before** all other passes and **only** when the selection contains zero raw URLs and zero existing Markdown links.
+
+1. **Collect candidate lines** — gather every non-blank, non-code-fence line. Strip leading list markers (`-`, `*`, `+`, or numbered) if present to isolate the text.
+2. **Search for each title** — for each candidate line, attempt to find its canonical URL:
+   a. **Preferred:** use a search tool (e.g., `microsoft_docs_search` for Microsoft/Azure titles, or a general web search tool if available) with the exact display text as the query.
+   b. **Match selection:** from the search results, pick the result whose title is the closest match to the display text. Prefer exact or near-exact title matches. If no result is a confident match (e.g., the best result's title is substantially different), skip that line and leave it unchanged.
+   c. **Fallback:** if no search tool is available, leave the line unchanged.
+3. **Build replacement list** — for each successfully resolved title, record: `(original_line -> - [Display Text](resolved_URL))`.
+4. **Apply replacements** — replace each matched line with its bullet-link form.
+5. After Pass 0 completes, proceed to Pass 1. Any lines that were not resolved remain as plain text and will pass through subsequent passes unchanged.
+
+**Display-text resolution rules:**
+
+- Use the original display text as-is for the link label — do not alter casing, punctuation, or wording.
+- Preserve the user's exact text even if the fetched page title differs slightly (e.g., the page title may have extra subtitle text).
+- If a line is already a bullet item with plain text (e.g., `- Some Page Title`), convert it to `- [Some Page Title](URL)` — keep the bullet.
+- Standalone text lines (no bullet) become `- [Display Text](URL)`.
+- Collapse blank lines between consecutive resolved bullet items (same rule as Pass 3).
 
 ### Pass 1: Analyze only (no edits yet)
 
@@ -227,8 +285,8 @@ This pass runs **after** Pass 2 and is independent of whether any URL conversion
 ## Post-checks (must do before returning output)
 
 1. **No-op check**
-   - Do **not** return the selection unchanged just because there were zero raw URLs to convert. Pass 3 (standalone formatting) must still run.
-   - Return the selection unchanged only if both Pass 2 and Pass 3 produced zero changes.
+   - Do **not** return the selection unchanged just because there were zero raw URLs to convert. Pass 0 (display-text resolution) and Pass 3 (standalone formatting) must still run.
+   - Return the selection unchanged only if Pass 0, Pass 2, and Pass 3 all produced zero changes.
 
 2. **Idempotency check**
    - Confirm you did not alter the label text or URL of any existing `[text](url)` link.
@@ -249,3 +307,7 @@ This pass runs **after** Pass 2 and is independent of whether any URL conversion
 - If `fetch_webpage` is supported but flaky:
   - Attempt it once per unique URL.
   - On failure, immediately fall back to inference (do not retry repeatedly).
+- For display-text resolution (Pass 0):
+  - Use `microsoft_docs_search` or equivalent search tools — do not guess URLs.
+  - Accept only high-confidence title matches; leave unresolved lines unchanged rather than linking to the wrong page.
+  - If no search tool is available and `fetch_webpage` cannot help, leave the text as-is and do not fabricate URLs.
