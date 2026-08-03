@@ -27,10 +27,12 @@ document, the **workspace-level rule wins** within that workspace.
 | Learning   | `Learning/*`                | *exam-based*  | Exam study labs — governed by `Governance-Lab.md` |
 | Project    | `Projects/*`                | `project-`    | Personal or open-source projects               |
 | Client     | `Clients/*`                 | `client-`     | Client-specific engagements                    |
+| Tenant     | `Projects/AzureGovernance`  | `tenant-`     | Tenant-wide governance (policy, monitoring, networking) |
 
 > Learning workspaces defer to `Governance-Lab.md` for resource-group
-> naming. The standards below apply to **Project** and **Client**
-> workspaces, and serve as defaults for any new workspace category.
+> naming. The standards below apply to **Project**, **Client**, and
+> **Tenant** workspaces, and serve as defaults for any new workspace
+> category.
 
 ---
 
@@ -44,7 +46,7 @@ document, the **workspace-level rule wins** within that workspace.
 
 | Segment         | Description                                                         | Example Values                              |
 | --------------- | ------------------------------------------------------------------- | ------------------------------------------- |
-| `<category>`    | Workspace category prefix (see §1)                                  | `project`, `client`                         |
+| `<category>`    | Workspace category prefix (see §1)                                  | `project`, `client`, `tenant`               |
 | `<workspace>`   | Short identifier for the workspace / client / project               | `docwriter`, `tcu`, `homelab`               |
 | `<environment>` | Target environment                                                  | `lab`, `dev`, `staging`, `prod`             |
 | `<purpose>`     | Functional role of the resource group                               | `network`, `compute`, `data`, `security`    |
@@ -59,6 +61,7 @@ document, the **workspace-level rule wins** within that workspace.
 | `project-docwriter-dev-data-01-bicep`          | Project  | DocumentWriter storage (Bicep)       |
 | `client-tcu-lab-network-01-tf`                 | Client   | TCU networking (Terraform)           |
 | `client-tcu-prod-security-01-bicep`            | Client   | TCU Key Vault & identities (Bicep)   |
+| `tenant-governance-prod-monitoring-tf`         | Tenant   | Central Log Analytics (Terraform)    |
 
 ### 2.3 Learning Workspaces (Reference)
 
