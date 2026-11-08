@@ -22,7 +22,7 @@ Use the following format for the script header comment section. Omit a program-n
 # Description   : Delete (and optionally purge) Azure AD users listed in a JSON file
 # Context       : AZ-104 lab — setup identity baseline
 #                 Microsoft Azure Administrator
-# Author        : Greg Tate, with help from a coding agent
+# Author        : Greg Tate & coding agent
 # Last Modified : YYYY-MM-DD
 # Revision History:
 #   YYYY-MM-DD - Initial version
