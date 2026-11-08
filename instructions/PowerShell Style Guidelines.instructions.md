@@ -117,6 +117,9 @@ finally {
 - Separate function definitions and major regions with one blank line.
 - In comment-based help, use one blank line between help sections, such as
   `.SYNOPSIS`, `.DESCRIPTION`, `.CONTEXT`, `.AUTHOR`, and `.NOTES`.
+- In comment-based help, indent each section's descriptive content four spaces
+  from the section keyword. Keep wrapped lines and continuation paragraphs
+  aligned with that indentation; do not align the content with the keyword.
 - When a blank line separates a logical code block, add a brief intent
   comment above that block as required by the general coding guidelines.
 - Do not add blank lines solely to create a reason for a comment.
@@ -128,16 +131,16 @@ The comment-based help rule produces this layout:
 ```powershell
 <#
 .SYNOPSIS
-Summarize the script.
+    Summarize the script.
 
 .DESCRIPTION
-Describe what the script does.
+    Describe what the script does.
 
 .CONTEXT
-Describe where the script is used.
+    Describe where the script is used.
 
 .AUTHOR
-Greg Tate
+    Greg Tate
 #>
 ```
 
