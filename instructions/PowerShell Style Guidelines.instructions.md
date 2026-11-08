@@ -108,7 +108,40 @@ finally {
   * `ft` → `Format-Table`
   * `fl` → `Format-List`
 
-### 3.4 Collapsible regions
+### 3.4 Blank lines
+
+- Use one blank line to separate logical groups of statements, such as
+  initialization, validation, processing, and output.
+- Use one blank line before a distinct conditional, loop, or try block
+  when it begins a new logical step.
+- Separate function definitions and major regions with one blank line.
+- In comment-based help, use one blank line between help sections, such as
+  `.SYNOPSIS`, `.DESCRIPTION`, `.CONTEXT`, `.AUTHOR`, and `.NOTES`.
+- When a blank line separates a logical code block, add a brief intent
+  comment above that block as required by the general coding guidelines.
+- Do not add blank lines solely to create a reason for a comment.
+- Apply these rules to new and modified code. For formatting-only requests,
+  preserve program behavior.
+
+The comment-based help rule produces this layout:
+
+```powershell
+<#
+.SYNOPSIS
+Summarize the script.
+
+.DESCRIPTION
+Describe what the script does.
+
+.CONTEXT
+Describe where the script is used.
+
+.AUTHOR
+Greg Tate
+#>
+```
+
+### 3.5 Collapsible regions
 
 * Use `#region` and `#endregion` directives to organize major sections of code.
 * All major sections SHOULD be wrapped in collapsible regions for better navigation.
