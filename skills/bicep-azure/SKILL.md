@@ -1,6 +1,6 @@
 ---
 name: bicep-azure
-description: 'Bicep coding standards, patterns, and governance for Azure deployments across Learning, Project, and Client workspaces. USE FOR: Bicep Azure code generation, module scaffolding, deployment stacks, parameter files, tagging, naming conventions, validation, security, Bicep style, Bicep best practices, ARM template alternatives, subscription-scoped deployments. DO NOT USE FOR: Terraform deployments (use terraform-azure), non-Azure IaC, ARM JSON templates.'
+description: 'Bicep coding standards, patterns, and governance for Azure deployments across Project and Tenant workspaces. USE FOR: Bicep Azure code generation, module scaffolding, deployment stacks, parameter files, tagging, naming conventions, validation, security, Bicep style, Bicep best practices, ARM template alternatives, subscription-scoped deployments. DO NOT USE FOR: Terraform deployments (use terraform-azure), non-Azure IaC, ARM JSON templates.'
 user-invocable: true
 argument-hint: '[workspace or project context]'
 ---
@@ -9,7 +9,7 @@ argument-hint: '[workspace or project context]'
 
 ## Goal
 
-Provide authoritative Bicep coding standards, patterns, and governance for all Azure deployments. This skill consolidates guidance from workspace-level governance documents, shared-contract rules, and real-world patterns observed across the Learning, Project, and Client workspaces.
+Provide Bicep implementation standards and patterns for Azure deployments. Governance **values** (naming, tags, regions, SKUs, lifecycle, security) are owned by `instructions/Azure Governance Guidelines.instructions.md`; this skill covers **how** to implement them in Bicep. Sections below point to the governance document by section number instead of copying its values.
 
 ## When to Use
 
@@ -24,12 +24,8 @@ Provide authoritative Bicep coding standards, patterns, and governance for all A
 
 This skill synthesizes guidance from:
 
-- `instructions/Azure Governance Guidelines.instructions.md` — cross-workspace naming, tagging, cost, security
-- `LearningAzure/.github/skills/bicep-scaffolding/SKILL.md` — lab-specific scaffolding rules (R-130 through R-138)
-- `LearningAzure/.github/skills/shared-contract/SKILL.md` — cross-cutting lab rules (R-001 through R-030)
-- `LearningAzure/Governance-Lab.md` — Learning workspace governance
-- `LearningAzure/.assets/shared/bicep/bicep.ps1` — shared deployment wrapper script
-- Real Bicep modules from `LearningAzure/AZ-104/hands-on-labs/` — proven patterns in production labs
+- `instructions/Azure Governance Guidelines.instructions.md` — governance values (authoritative)
+- `instructions/General Coding Guidelines.instructions.md` — code header format
 
 ---
 
@@ -55,7 +51,7 @@ bicep/
 ├── main.bicep         # Root module (subscription or resource group scope)
 ├── main.bicepparam    # Parameter values file
 ├── bicepconfig.json   # Lint and compile configuration
-├── bicep.ps1          # Deployment wrapper script (shared, never modify)
+├── bicep.ps1          # Deployment wrapper script (use the workspace's shared copy when one exists)
 └── modules/
     └── <module>.bicep # Individual module files
 ```
@@ -67,24 +63,8 @@ bicep/
 | `main.bicep`       | Root orchestration — target scope, parameters, resource group, module calls |
 | `main.bicepparam`  | Parameter values using `using './main.bicep'` syntax          |
 | `bicepconfig.json` | Bicep linter and compiler settings                            |
-| `bicep.ps1`        | Shared deployment wrapper — copy from `.assets/shared/bicep/bicep.ps1`, never create custom |
+| `bicep.ps1`        | Deployment wrapper — copy the workspace's shared wrapper when one exists instead of writing a new one |
 | `modules/*.bicep`  | Individual module files — one concern per module              |
-
-### Learning Workspace Layout (Labs)
-
-```
-<EXAM>/hands-on-labs/<domain>/lab-<topic>/
-├── README.md
-├── bicep/
-│   ├── main.bicep
-│   ├── main.bicepparam
-│   ├── bicepconfig.json
-│   ├── bicep.ps1
-│   └── modules/
-│       └── <module>.bicep
-└── validation/
-    └── <validation-script>.ps1
-```
 
 ---
 
@@ -92,7 +72,7 @@ bicep/
 
 ### Subscription-Scoped Deployments
 
-Use `targetScope = 'subscription'` for labs and projects that create resource groups:
+Use `targetScope = 'subscription'` for deployments that create resource groups:
 
 ```bicep
 targetScope = 'subscription'
@@ -112,13 +92,9 @@ module networking 'modules/networking.bicep' = {
 }
 ```
 
-### Deployment Stack Naming (Learning Workspace)
-
-Pattern: `stack-<domain>-<topic>` — no exam code in stack name.
-
 ### Wrapper Script Commands
 
-The shared `bicep.ps1` supports these actions:
+A deployment wrapper (`bicep.ps1`) typically supports these actions:
 
 | Command    | Purpose                           |
 | ---------- | --------------------------------- |
@@ -144,115 +120,64 @@ The shared `bicep.ps1` supports these actions:
 .\bicep.ps1 destroy
 ```
 
-The wrapper script auto-derives the stack name from the parameters file and validates subscription context before any deployment action.
-
-Cleanup destroy command:
-
-```powershell
-az stack sub delete --name $stackName --yes --force-deletion-types $forceTypes
-```
+The wrapper derives the stack name from the parameters file and validates subscription context before any deployment action. The `destroy` action must follow the destroy sequence in §9.
 
 ---
 
 ## 4. Naming Conventions
 
-### 4.1 Resource Group Naming by Workspace
+### 4.1 Governance Values
 
-| Workspace | Pattern                                                          | Example                                    |
-| --------- | ---------------------------------------------------------------- | ------------------------------------------ |
-| Learning  | `<exam>-<domain>-<topic>-bicep`                                  | `az104-compute-enable-boot-diagnostics-bicep` |
-| Project   | `project-<workspace>-<environment>-<purpose>[-<instance>]-bicep` | `project-docwriter-dev-data-01-bicep`      |
-| Client    | `client-<client>-<environment>-<purpose>[-<instance>]-bicep`     | `client-tcu-prod-security-01-bicep`        |
+- Resource group pattern, closed value lists, and validation regex: governance §2.
+- Resource type abbreviations, Global and Suffix columns, and name patterns: governance §4.1–4.2.
+- Length and character rules: governance §4.3.
+- Random suffix rules: governance §4.4.
 
-### 4.2 Resource Naming
+### 4.2 Bicep Style Rules
 
-Pattern: `<prefix>-<descriptive-name>[-<instance>]`
+- Use `camelCase` for Bicep parameter names, variables, and resource symbolic names.
+- Build names in variables so each name is defined once.
 
-Use Azure CAF-aligned abbreviations:
+### 4.3 Global Names and Random Suffix
 
-| Resource Type           | Prefix   | Example                |
-| ----------------------- | -------- | ---------------------- |
-| Virtual Network         | `vnet`   | `vnet-core-01`         |
-| Subnet                  | `snet`   | `snet-app-01`          |
-| Network Security Group  | `nsg`    | `nsg-web-01`           |
-| Network Interface       | `nic`    | `nic-vm-web-01`        |
-| Virtual Machine         | `vm`     | `vm-web-01`            |
-| Storage Account         | `st`     | `staz104bootdiag`      |
-| Key Vault               | `kv`     | `kv-secrets-01`        |
-| App Service Plan        | `asp`    | `asp-web-01`           |
-| Function App            | `func`   | `func-processor-01`    |
-| Log Analytics           | `log`    | `log-monitor-01`       |
-| Application Insights    | `appi`   | `appi-web-01`          |
-| OpenAI Account          | `oai`    | `oai-gpt-01`           |
-| Cognitive Services      | `cog`    | `cog-lang-7k3m`        |
-| Recovery Services Vault | `rsv`    | `rsv-backup-4h8n`      |
-| Bastion Host            | `bas`    | `bas-hub-01`           |
-
-### 4.3 Style Rules
-
-- All segments use **lowercase with hyphens** as delimiters.
-- Resources disallowing hyphens (Storage Accounts, Container Registries) use contiguous lowercase alphanumeric.
-- Deployment moniker (`-bicep`) is mandatory and always last for resource groups.
-- Use `camelCase` for Bicep parameter names and local variables.
-
-### 4.4 Static Names by Default
-
-All resource names must be static and predictable. Random suffixes are **only** permitted for resources subject to soft-delete name reservation:
-
-| Resource           | Retention | Random Suffix Required |
-| ------------------ | --------- | ---------------------- |
-| Cognitive Services | 48 hrs    | Yes                    |
-| Key Vault          | 7–90 days | Yes                    |
-| API Management     | 48 hrs    | Yes                    |
-| Recovery Vault     | 14 days   | Yes                    |
-
-Random suffix format: `uniqueString(resourceGroup().id)` truncated or scoped.
+`uniqueString()` is deterministic, so `uniqueString(resourceGroup().id)` alone returns the same value after a destroy and recreate and does not meet governance §4.4. Include `dateCreated` in the seed: the suffix stays stable across redeploys and changes when the deployment is recreated with a new `dateCreated`. A same-day recreate keeps the same suffix, so the purge in §9 must run (or use a new `dateCreated`).
 
 ```bicep
-var suffix = uniqueString(resourceGroup().id)
-var cogName = 'cog-${topic}-${suffix}'
+@description('Optional 3-4 letter tenant uniqueness prefix for globally unique names (governance §4.1)')
+@maxLength(4)
+param tenantPrefix string = ''
+
+var suffix = take(uniqueString(resourceGroup().id, dateCreated), 4)
+var tenantPart = empty(tenantPrefix) ? '' : '${tenantPrefix}-'
+var keyVaultName = '${tenantPart}kv-${workspace}-${suffix}'
+var storageName = '${tenantPrefix}st${workspace}data01'
 ```
 
 ---
 
 ## 5. Tagging Standards
 
+Tag keys, closed value lists, and rules: governance §3.
+
 ### 5.1 Common Tags Pattern
 
 ```bicep
 var commonTags = {
-  Environment: environment
-  Category: category           // 'Learning', 'Project', 'Client'
-  Workspace: workspace
+  Environment: environment     // 'Lab', 'Dev', 'Staging', 'Prod'
+  Category: category           // 'Project', 'Tenant'
+  Workspace: workspaceTag
   Purpose: purpose
   Owner: owner
   DateCreated: dateCreated     // Static YYYY-MM-DD — never use utcNow()
   DeploymentMethod: 'Bicep'
-  ManagedBy: 'bicep'
 }
 ```
 
-### 5.2 Tag Rules
+### 5.2 Bicep Implementation Rules
 
-- `DateCreated` must be a static string. Never use `utcNow()` or any dynamic function.
-- Tag keys use **PascalCase**.
 - Apply tags to all taggable resources via `commonTags`.
 - Pass `commonTags` as an explicit parameter to all modules.
-- Workspace-specific governance may add required tags.
-
-### 5.3 Learning Workspace Tags
-
-```bicep
-var commonTags = {
-  Environment: 'Lab'
-  Project: '<EXAM>'            // 'AI-102', 'AZ-104'
-  Domain: '<Domain>'           // 'Networking', 'Compute'
-  Purpose: '<Purpose>'         // 'Enable Boot Diagnostics'
-  Owner: owner
-  DateCreated: dateCreated
-  DeploymentMethod: 'Bicep'
-}
-```
+- Set `dateCreated` once in `main.bicepparam` and never change it on later deployments.
 
 ---
 
@@ -268,8 +193,19 @@ Every parameter must have:
 - `@secure()` decorator for sensitive values
 
 ```bicep
-@description('Azure region for resource deployment')
-param location string = 'eastus'
+@description('Azure region for resource deployment (governance §5)')
+@allowed([
+  'centralus'
+  'eastus'
+  'eastus2'
+  'northcentralus'
+  'southcentralus'
+  'westcentralus'
+  'westus'
+  'westus2'
+  'westus3'
+])
+param location string = 'centralus'
 
 @description('Resource owner name')
 param owner string = 'Greg Tate'
@@ -287,7 +223,7 @@ param adminPassword string
 ```bicep
 using './main.bicep'
 
-param location = 'eastus'
+param location = 'centralus'
 param owner = 'Greg Tate'
 param dateCreated = '<YYYY-MM-DD>'
 ```
@@ -297,13 +233,13 @@ param dateCreated = '<YYYY-MM-DD>'
 Use variables for computed values and repeated expressions:
 
 ```bicep
-var resourceGroupName = 'az104-${domain}-${topic}-bicep'
+var resourceGroupName = 'project-${workspace}-${environmentSegment}-${purposeSegment}'
 
 var commonTags = {
-  Environment: 'Lab'
-  Project: 'AZ-104'
-  Domain: 'Compute'
-  Purpose: 'Enable Boot Diagnostics'
+  Environment: 'Dev'
+  Category: 'Project'
+  Workspace: 'DocumentWriter'
+  Purpose: 'Storage'
   Owner: owner
   DateCreated: dateCreated
   DeploymentMethod: 'Bicep'
@@ -397,21 +333,21 @@ module compute 'modules/compute.bicep' = {
 
 ## 8. Security
 
+Security requirements: governance §8. Bicep implementation:
+
 - Never hardcode secrets in Bicep files.
 - Use `@secure()` decorator for sensitive parameters.
 - Prefer Managed Identities over passwords or keys.
-- Use Key Vault with RBAC authorization for secret storage.
+- Key Vaults must set `enableRbacAuthorization: true`.
 - Enable encryption for storage accounts and disks.
-- Use private endpoints where applicable (required for production; optional for lab/dev).
-- Public network access is acceptable in lab/dev environments only.
+- Use private endpoints only when specifically requested.
+- VM network access and outbound connectivity: follow governance §8.7–8.8. Lab NSG rules for RDP/SSH must use a single owner `/32` source supplied by parameter, never `*` or `Internet`.
 - Implement least privilege with Azure RBAC.
 - Never output sensitive values without marking them appropriately.
 
 ### Password Implementation
 
-Use `uniqueString()`, a static pattern, or supply in `.bicepparam`. Mark with `@secure()`.
-
-Target pattern for labs: `AzureLab2026!`
+Supply passwords through a `@secure()` parameter at deploy time. Never set a default value or commit the password to `.bicepparam`.
 
 ```bicep
 @description('Administrator password')
@@ -423,30 +359,47 @@ param adminPassword string
 
 ## 9. Soft-Delete and Purge Management
 
-### Disable Pattern (Lab/Dev)
+Behavior and lab/dev handling per resource type: governance §7.
+
+### Resource Settings (Lab/Dev)
+
+- Key Vault: soft-delete cannot be disabled; do not set `enableSoftDelete: false`. Leave `enablePurgeProtection` unset.
+- App Configuration: leave `enablePurgeProtection` unset.
+- Recovery Services Vault: set `securitySettings.softDeleteSettings.softDeleteState: 'Disabled'`; never `AlwaysON`.
 
 ```bicep
-resource keyVault 'Microsoft.KeyVault/vaults@2024-04-01-preview' = {
-  ...
+resource keyVault 'Microsoft.KeyVault/vaults@2026-02-01' = {
+  name: keyVaultName
+  location: location
+  tags: commonTags
   properties: {
-    ...
-    enableSoftDelete: false
+    tenantId: subscription().tenantId
+    sku: {
+      family: 'A'
+      name: 'standard'
+    }
+    enableRbacAuthorization: true
   }
 }
 ```
 
-For Cognitive Services:
+### Destroy Sequence (Lab/Dev)
 
-```bicep
-// softDeleteState is not always available — check API version support
-```
+Deleting a deployment stack soft-deletes resources but does not purge them. Run the steps that apply to the deployed resource types:
 
-### Random Suffix for Soft-Delete Resources
+```powershell
+# 1. Permanently delete workspaces first; they can't be purged once soft-deleted
+az monitor log-analytics workspace delete --resource-group $rgName --workspace-name $logName --force --yes
+az ml workspace delete --resource-group $rgName --name $mlwName --permanently-delete --yes
 
-```bicep
-var suffix = uniqueString(resourceGroup().id)
-var cogName = 'cog-${topic}-${suffix}'
-var kvName = 'kv-${topic}-${suffix}'
+# 2. Delete the deployment stack
+az stack sub delete --name $stackName --yes --force-deletion-types $forceTypes
+
+# 3. Purge soft-deleted resources that reserve their names
+az keyvault purge --name $kvName --location $location
+az cognitiveservices account purge --name $aiName --resource-group $rgName --location $location
+az apim deletedservice purge --service-name $apimName --location $location
+az appconfig purge --name $appcsName --location $location --yes
 ```
 
 ---
@@ -455,7 +408,7 @@ var kvName = 'kv-${topic}-${suffix}'
 
 ### Subscription Validation
 
-The shared `bicep.ps1` wrapper validates subscription context automatically before `apply`, `destroy`, and `plan` actions. It checks against the configured lab subscription ID.
+The deployment wrapper validates subscription context before `apply`, `destroy`, and `plan` actions. It checks against the configured subscription ID.
 
 ### Validation Sequence
 
@@ -466,7 +419,7 @@ Use-AzProfile Lab
 # Validate syntax
 .\bicep.ps1 validate
 
-# Capacity tests for constrained services (R-019)
+# Capacity tests for constrained services
 # Preview deployment
 .\bicep.ps1 plan
 
@@ -478,33 +431,13 @@ Use-AzProfile Lab
 
 ## 11. Cost Governance
 
-### Default SKUs (Non-Production)
+Default SKUs, auto-shutdown schedule, cleanup policy, and resource limits: governance §6.
 
-| Resource Type   | Default SKU           |
-| --------------- | --------------------- |
-| Virtual Machine | `Standard_B2s`        |
-| Storage Account | `Standard_LRS`        |
-| Load Balancer   | `Basic`               |
-| Public IP       | `Basic`               |
-| SQL Database    | `Basic` / `S0`        |
-| Managed Disk    | `Standard_HDD`        |
-| Bastion         | `Developer`           |
-| AI Services     | `F0` → `S0` fallback  |
+Bicep implementation:
 
-### Auto-Shutdown Schedule
-
-All VMs must include auto-shutdown via `Microsoft.DevTestLab/schedules`:
-
-| Setting   | Default Value          |
-| --------- | ---------------------- |
-| Time      | `0800` (8:00 AM)       |
-| Time Zone | `Central Standard Time`|
-
-### Cleanup Policy
-
-- Destroy lab/dev resources within 7 days.
-- Track via `DateCreated` tag.
-- README cleanup section must reference the 7-day policy.
+- Use `Microsoft.DevTestLab/schedules` for VM auto-shutdown, with the time and time zone from governance §6.2.
+- Expose SKUs as parameters with governance §6.1 values as defaults.
+- README cleanup sections must reference the 7-day policy (governance §6.3).
 
 ---
 
@@ -547,24 +480,14 @@ Common current API versions:
 | `Microsoft.Network/*`           | `2024-05-01`          |
 | `Microsoft.Compute/*`           | `2024-07-01`          |
 | `Microsoft.Storage/*`           | `2024-01-01`          |
-| `Microsoft.KeyVault/vaults`     | `2024-04-01-preview`  |
+| `Microsoft.KeyVault/vaults`     | `2026-02-01` (earlier versions retire 2027-02-27) |
 | `Microsoft.CognitiveServices/*` | `2024-10-01`          |
 
 ---
 
 ## 14. Code Header
 
-Include in all `.bicep` files using `//` comment syntax:
-
-```bicep
-// -------------------------------------------------------------------------
-// Program: <filename>
-// Description: <purpose>
-// Context: <workspace context>
-// Author: Greg Tate
-// Date: <YYYY-MM-DD>
-// -------------------------------------------------------------------------
-```
+Include the header defined in `instructions/General Coding Guidelines.instructions.md` at the top of all `.bicep` files, using `//` comments.
 
 ---
 
@@ -594,7 +517,7 @@ output storageAccountName string = storage.outputs.storageName
 - **MUST NOT** disable security features for convenience.
 - **MUST NOT** use default passwords or keys.
 - **MUST NOT** use `utcNow()` for `DateCreated` tags.
-- **SHOULD NOT** create custom `bicep.ps1` wrapper scripts — always copy from shared.
+- **SHOULD NOT** write a new `bicep.ps1` wrapper when the workspace already has a shared one.
 - **SHOULD** avoid overly complex conditional logic that obscures intent.
 - **Anti-pattern**: using ARM JSON templates when Bicep is available.
 - **Anti-pattern**: inlining all resources in `main.bicep` instead of using modules.
@@ -605,20 +528,14 @@ output storageAccountName string = storage.outputs.storageName
 
 When rules conflict, apply this precedence (highest wins):
 
-1. **Workspace-specific governance** (e.g., `Governance-Lab.md`)
-2. **Azure Governance Guidelines** (`instructions/Azure Governance Guidelines.instructions.md`)
-3. **This skill** (general Bicep on Azure patterns)
-4. **General Coding Guidelines** (`instructions/General Coding Guidelines.instructions.md`)
+1. **Explicit user instruction** for the current task — state any deviation from the standards
+2. **Workspace-specific governance** (the workspace's own governance instructions)
+3. **Azure Governance Guidelines** (`instructions/Azure Governance Guidelines.instructions.md`)
+4. **This skill** (Bicep on Azure implementation patterns)
+5. **General Coding Guidelines** (`instructions/General Coding Guidelines.instructions.md`)
 
 ---
 
 ## 18. Region Rules
 
-| Setting          | Value                                     |
-| ---------------- | ----------------------------------------- |
-| Default (Lab)    | `centralus` (supports Bastion Developer)  |
-| Default (Other)  | `eastus`                                  |
-| Fallback         | `eastus2` → `westus2` → `northcentralus` |
-| Allowed          | Any US region                             |
-
-Use default region unless capacity requires fallback. Document the choice if deviating.
+Default, fallback, and allowed regions: governance §5. Use the allowed list in the `location` parameter's `@allowed()` decorator (§6.1).

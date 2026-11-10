@@ -1,6 +1,6 @@
 ---
 name: terraform-azure
-description: 'Terraform coding standards, patterns, and governance for Azure deployments across Learning, Project, and Client workspaces. USE FOR: Terraform Azure code generation, module scaffolding, provider configuration, state management, variable patterns, tagging, naming conventions, validation, security, Terraform style, Terraform best practices, AzureRM provider, Terraform Azure governance. DO NOT USE FOR: local Hyper-V labs (use terraform-ad-lab), Bicep deployments (use bicep-azure), non-Azure Terraform providers.'
+description: 'Terraform coding standards, patterns, and governance for Azure deployments across Project and Tenant workspaces. USE FOR: Terraform Azure code generation, module scaffolding, provider configuration, state management, variable patterns, tagging, naming conventions, validation, security, Terraform style, Terraform best practices, AzureRM provider, Terraform Azure governance. DO NOT USE FOR: local Hyper-V labs (use terraform-ad-lab), Bicep deployments (use bicep-azure), non-Azure Terraform providers.'
 user-invocable: true
 argument-hint: '[workspace or project context]'
 ---
@@ -9,7 +9,7 @@ argument-hint: '[workspace or project context]'
 
 ## Goal
 
-Provide authoritative Terraform coding standards, patterns, and governance for all Azure deployments. This skill consolidates guidance from workspace-level governance documents, community best practices, and real-world patterns observed across the Learning, Project, and Client workspaces.
+Provide Terraform implementation standards and patterns for Azure deployments. Governance **values** (naming, tags, regions, SKUs, lifecycle, security) are owned by `instructions/Azure Governance Guidelines.instructions.md`; this skill covers **how** to implement them in Terraform. Sections below point to the governance document by section number instead of copying its values.
 
 ## When to Use
 
@@ -23,12 +23,8 @@ Provide authoritative Terraform coding standards, patterns, and governance for a
 
 This skill synthesizes guidance from:
 
+- `instructions/Azure Governance Guidelines.instructions.md` — governance values (authoritative)
 - `instructions/Terraform Style Guidelines.instructions.md` — formatting, naming, best practices
-- `instructions/Azure Governance Guidelines.instructions.md` — cross-workspace naming, tagging, cost, security
-- `LearningAzure/.github/skills/terraform-scaffolding/SKILL.md` — lab-specific scaffolding rules (R-120 through R-128)
-- `LearningAzure/.github/skills/shared-contract/SKILL.md` — cross-cutting lab rules (R-001 through R-030)
-- `LearningAzure/Governance-Lab.md` — Learning workspace governance
-- `TCU/.github/instructions/terraform-governance.instructions.md` — Client workspace governance
 - [terraform.instructions.md](https://github.com/github/awesome-copilot/blob/main/instructions/terraform.instructions.md) — community Terraform conventions
 - [terraform-azure.instructions.md](https://github.com/github/awesome-copilot/blob/main/instructions/terraform-azure.instructions.md) — community Azure Terraform best practices
 
@@ -82,26 +78,6 @@ terraform/
 
 If `main.tf` or `variables.tf` grows too large, split by resource type (e.g., `main.networking.tf`, `variables.networking.tf`).
 
-### Learning Workspace Layout (Labs)
-
-```
-<EXAM>/hands-on-labs/<domain>/lab-<topic>/
-├── README.md
-├── terraform/
-│   ├── main.tf
-│   ├── variables.tf
-│   ├── outputs.tf
-│   ├── providers.tf
-│   ├── terraform.tfvars
-│   └── modules/
-│       └── <module>/
-│           ├── main.tf
-│           ├── variables.tf
-│           └── outputs.tf
-└── validation/
-    └── <validation-script>.ps1
-```
-
 ---
 
 ## 3. Provider Configuration
@@ -135,81 +111,59 @@ provider "azurerm" {
 }
 ```
 
+For lab and dev deployments, add the soft-delete flags from §10 to the `features {}` block.
+
 ### Rules
 
 - Use AzureRM by default. Use AzAPI only if AzureRM lacks a required feature.
 - Pin provider versions with pessimistic constraint (`~>`).
 - Target latest stable Terraform and Azure provider versions.
-- Include the `random` provider when the deployment contains soft-delete resources requiring unique names.
+- Include the `random` provider when the deployment contains resource types marked **Suffix** in governance §4.2.
 - Subscription ID must come from a variable or `ARM_SUBSCRIPTION_ID` environment variable — never hardcode in the provider block.
-
-### Learning Workspace Override
-
-Learning labs use `lab_subscription_id` variable name and include a subscription guard (see §11).
 
 ---
 
 ## 4. Naming Conventions
 
-### 4.1 Resource Group Naming by Workspace
+### 4.1 Governance Values
 
-| Workspace | Pattern                                                        | Example                                |
-| --------- | -------------------------------------------------------------- | -------------------------------------- |
-| Learning  | `<exam>-<domain>-<topic>-tf`                                   | `az104-networking-vnet-peering-tf`     |
-| Project   | `project-<workspace>-<environment>-<purpose>[-<instance>]-tf`  | `project-docwriter-lab-compute-tf`     |
-| Client    | `client-<client>-<environment>-<purpose>[-<instance>]`         | `client-tcu-lab-network-01`            |
+- Resource group pattern, closed value lists, and validation regex: governance §2.
+- Resource type abbreviations, Global and Suffix columns, and name patterns: governance §4.1–4.2.
+- Length and character rules: governance §4.3.
+- Random suffix rules: governance §4.4.
 
-### 4.2 Resource Naming
+### 4.2 Terraform Style Rules
 
-Pattern: `<prefix>-<descriptive-name>[-<instance>]`
-
-Use Azure CAF-aligned abbreviations:
-
-| Resource Type           | Prefix   | Example                |
-| ----------------------- | -------- | ---------------------- |
-| Virtual Network         | `vnet`   | `vnet-core-01`         |
-| Subnet                  | `snet`   | `snet-app-01`          |
-| Network Security Group  | `nsg`    | `nsg-web-01`           |
-| Virtual Machine         | `vm`     | `vm-web-01`            |
-| Storage Account         | `st`     | `stdocwriterdata01`    |
-| Key Vault               | `kv`     | `kv-secrets-01`        |
-| App Service Plan        | `asp`    | `asp-web-01`           |
-| App Service             | `app`    | `app-api-01`           |
-| Function App            | `func`   | `func-processor-01`    |
-| SQL Server              | `sql`    | `sql-main-01`          |
-| Log Analytics           | `log`    | `log-monitor-01`       |
-| Application Insights    | `appi`   | `appi-web-01`          |
-| Container Registry      | `acr`    | `acrdocwriter01`       |
-| OpenAI Account          | `oai`    | `oai-gpt-01`           |
-| AI Services             | `ais`    | `ais-shared-01`        |
-| Cognitive Services      | `cog`    | `cog-docwriter-7k3m`   |
-
-### 4.3 Style Rules
-
-- All segments use **lowercase with hyphens** as delimiters.
-- Resources disallowing hyphens (Storage Accounts, Container Registries) use contiguous lowercase alphanumeric.
 - Use `snake_case` for Terraform identifiers (variables, locals, resource names, module names).
 - Use descriptive resource labels: `azurerm_resource_group.main` not `azurerm_resource_group.rg1`.
-- Deployment moniker (`-tf`) is mandatory and always last for resource groups.
+- Build names in `locals.tf` so each name is defined once.
 
-### 4.4 Static Names by Default
+### 4.3 Global Names and Random Suffix
 
-All resource names must be static and predictable. Random suffixes are **only** permitted for resources subject to soft-delete name reservation:
-
-| Resource           | Retention | Random Suffix Required |
-| ------------------ | --------- | ---------------------- |
-| Cognitive Services | 48 hrs    | Yes                    |
-| Key Vault          | 7–90 days | Yes                    |
-| API Management     | 48 hrs    | Yes                    |
-| Recovery Vault     | 14 days   | Yes                    |
-
-Random suffix format: 4 lowercase alphanumeric characters via `random_string`.
+`random_string` meets the governance §4.4 stability rule: the value persists in state across applies and is regenerated after `terraform destroy`.
 
 ```hcl
+variable "tenant_prefix" {
+  description = "Optional 3-4 letter tenant uniqueness prefix for globally unique names (governance §4.1)"
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = can(regex("^([a-z]{3,4})?$", var.tenant_prefix))
+    error_message = "Tenant prefix must be empty or 3-4 lowercase letters."
+  }
+}
+
 resource "random_string" "suffix" {
   length  = 4
   upper   = false
   special = false
+}
+
+locals {
+  tenant_part    = var.tenant_prefix == "" ? "" : "${var.tenant_prefix}-"
+  key_vault_name = "${local.tenant_part}kv-${var.workspace}-${random_string.suffix.result}"
+  storage_name   = "${var.tenant_prefix}st${var.workspace}data01"
 }
 ```
 
@@ -217,46 +171,29 @@ resource "random_string" "suffix" {
 
 ## 5. Tagging Standards
 
+Tag keys, closed value lists, and rules: governance §3.
+
 ### 5.1 Common Tags Pattern
 
 ```hcl
 locals {
   common_tags = {
-    Environment      = var.environment
-    Category         = var.category         # "Learning", "Project", "Client"
-    Workspace        = var.workspace
+    Environment      = var.environment       # "Lab", "Dev", "Staging", "Prod"
+    Category         = var.category          # "Project", "Tenant"
+    Workspace        = var.workspace_tag
     Purpose          = var.purpose
     Owner            = var.owner
-    DateCreated      = var.date_created     # Static YYYY-MM-DD — never use timestamp()
+    DateCreated      = var.date_created      # Static YYYY-MM-DD — never use timestamp()
     DeploymentMethod = "Terraform"
-    ManagedBy        = "terraform"
   }
 }
 ```
 
-### 5.2 Tag Rules
+### 5.2 Terraform Implementation Rules
 
-- `DateCreated` must be a static string. Never use `timestamp()` or any dynamic function.
-- Tag keys use **PascalCase**.
 - Apply tags to all taggable resources via `local.common_tags`.
 - Pass `common_tags` as an explicit input to all modules.
-- Workspace-specific governance may add required tags (e.g., `ExamCode`, `Client`, `CostCenter`).
-
-### 5.3 Learning Workspace Tags
-
-```hcl
-locals {
-  common_tags = {
-    Environment      = "Lab"
-    Project          = "<EXAM>"         # "AI-102", "AZ-104"
-    Domain           = "<Domain>"       # "Networking", "Compute"
-    Purpose          = "<Purpose>"      # "VNet Peering"
-    Owner            = var.owner
-    DateCreated      = var.date_created
-    DeploymentMethod = "Terraform"
-  }
-}
-```
+- Set `date_created` once in `terraform.tfvars` and never change it on later applies.
 
 ---
 
@@ -272,13 +209,16 @@ Every variable must have:
 
 ```hcl
 variable "location" {
-  description = "Azure region for resource deployment"
+  description = "Azure region for resource deployment (governance §5)"
   type        = string
-  default     = "eastus"
+  default     = "centralus"
 
   validation {
-    condition     = contains(["eastus", "eastus2", "westus2", "centralus"], var.location)
-    error_message = "Location must be a supported US region."
+    condition = contains([
+      "centralus", "eastus", "eastus2", "northcentralus", "southcentralus",
+      "westcentralus", "westus", "westus2", "westus3"
+    ], var.location)
+    error_message = "Location must be an allowed region from governance §5."
   }
 }
 
@@ -310,7 +250,7 @@ variable "date_created" {
 
 ```hcl
 locals {
-  resource_group_name  = "project-docwriter-tf"
+  resource_group_name  = "project-docwriter-dev-data"
   resource_name_prefix = "${var.project_name}-${var.environment}"
   common_tags          = { ... }
 }
@@ -365,13 +305,11 @@ modules/<module-name>/
 
 ## 8. State Management
 
-### By Workspace
+### Backend
 
-| Workspace | Backend                         | Notes                                |
-| --------- | ------------------------------- | ------------------------------------ |
-| Learning  | Local state only                | Never configure remote backend       |
-| Project   | Local or remote (Azure Storage) | Use Terraform workspaces as needed   |
-| Client    | Remote (Azure Storage)          | State locking via blob lease         |
+| Workspace         | Backend                         | Notes                                |
+| ----------------- | ------------------------------- | ------------------------------------ |
+| Project / Tenant  | Local or remote (Azure Storage) | Remote state uses blob-lease locking |
 
 ### Rules
 
@@ -385,14 +323,15 @@ modules/<module-name>/
 
 ## 9. Security
 
+Security requirements: governance §8. Terraform implementation:
+
 - Never hardcode secrets in Terraform files or state.
 - Use Managed Identities instead of service principals where possible.
-- Mark sensitive variables with `sensitive = true`.
-- Mark sensitive outputs with `sensitive = true`.
-- Use Key Vault with RBAC authorization for secret storage.
+- Mark sensitive variables and outputs with `sensitive = true`.
+- Key Vaults must use RBAC authorization. Set the `azurerm_key_vault` RBAC authorization argument to `true`; the argument was renamed during the 4.x releases, so confirm the name for the pinned provider version.
 - Enable encryption for storage accounts and disks.
-- Use private endpoints where applicable (required for production; optional for lab/dev).
-- Public network access is acceptable in lab/dev environments only.
+- Use private endpoints only when specifically requested.
+- VM network access and outbound connectivity: follow governance §8.7–8.8. Lab NSG rules for RDP/SSH must use a single owner `/32` source supplied by variable, never `*` or `Internet`.
 - Implement least privilege with Azure RBAC.
 - Use `.gitignore` to exclude files containing sensitive information.
 - Regularly scan with `tfsec`, `trivy`, or `checkov` for security issues.
@@ -401,40 +340,57 @@ modules/<module-name>/
 
 ## 10. Soft-Delete and Purge Management
 
-### Disable Patterns (Lab/Dev)
+Behavior and lab/dev handling per resource type: governance §7.
 
-For non-production environments, disable soft-delete when the provider allows it:
+### Provider Flags (Lab/Dev)
+
+Purge or permanently delete on `terraform destroy`:
 
 ```hcl
-# Cognitive Account
-purge_soft_delete_on_destroy = false     # Unique names eliminate purge need
-
-# Key Vault feature flags
-cognitive_account {
-  purge_soft_delete_on_destroy = false
+provider "azurerm" {
+  features {
+    api_management {
+      purge_soft_delete_on_destroy = true
+    }
+    app_configuration {
+      purge_soft_delete_on_destroy = true
+    }
+    cognitive_account {
+      purge_soft_delete_on_destroy = true
+    }
+    key_vault {
+      purge_soft_delete_on_destroy = true
+    }
+    log_analytics_workspace {
+      permanently_delete_on_destroy = true
+    }
+    machine_learning {
+      purge_soft_deleted_workspace_on_destroy = true
+    }
+    recovery_service {
+      purge_protected_items_from_vault_on_destroy = true
+    }
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
 }
-
-# Log Analytics
-permanently_delete_on_destroy = true
-
-# Recovery Vault
-purge_protected_items_from_vault_on_destroy = true
-
-# General
-soft_delete_enabled = false
 ```
+
+The `api_management`, `app_configuration`, `cognitive_account`, and `key_vault` purge flags default to `true`; set them explicitly so the intent is visible. The `log_analytics_workspace`, `machine_learning`, and `recovery_service` flags default to `false` and must be set.
+
+### Resource Settings (Lab/Dev)
+
+- Key Vault: soft-delete cannot be disabled; leave `purge_protection_enabled = false`.
+- App Configuration: leave `purge_protection_enabled = false`.
+- Recovery Services Vault: set `soft_delete_enabled = false`; never enable always-on soft delete.
 
 ### Random Suffix for Soft-Delete Resources
 
 ```hcl
-resource "random_string" "suffix" {
-  length  = 4
-  upper   = false
-  special = false
-}
-
-resource "azurerm_cognitive_account" "example" {
-  name = "cog-${var.topic}-${random_string.suffix.result}"
+resource "azurerm_cognitive_account" "openai" {
+  name                  = "${local.tenant_part}oai-${var.workspace}-gpt-${random_string.suffix.result}"
+  custom_subdomain_name = "${local.tenant_part}oai-${var.workspace}-gpt-${random_string.suffix.result}"
   ...
 }
 ```
@@ -443,7 +399,7 @@ resource "azurerm_cognitive_account" "example" {
 
 ## 11. Subscription Safety
 
-### Subscription Guard (Learning Workspace)
+### Subscription Guard
 
 ```hcl
 data "azurerm_subscription" "current" {}
@@ -451,7 +407,7 @@ data "azurerm_subscription" "current" {}
 resource "terraform_data" "subscription_guard" {
   lifecycle {
     precondition {
-      condition     = data.azurerm_subscription.current.subscription_id == var.lab_subscription_id
+      condition     = data.azurerm_subscription.current.subscription_id == var.subscription_id
       error_message = "DEPLOYMENT BLOCKED — wrong subscription detected."
     }
   }
@@ -476,35 +432,12 @@ Always review `terraform plan` output before applying, especially for production
 
 ## 12. Cost Governance
 
-### Default SKUs (Non-Production)
+Default SKUs, auto-shutdown schedule, cleanup policy, and resource limits: governance §6.
 
-| Resource Type   | Default SKU           |
-| --------------- | --------------------- |
-| Virtual Machine | `Standard_B2s`        |
-| Storage Account | `Standard_LRS`        |
-| Load Balancer   | `Basic`               |
-| Public IP       | `Basic`               |
-| SQL Database    | `Basic` / `S0`        |
-| Managed Disk    | `Standard_HDD`        |
-| Bastion         | `Developer`           |
-| AI Services     | `F0` → `S0` fallback  |
+Terraform implementation:
 
-### Auto-Shutdown Schedule
-
-All VMs must include auto-shutdown:
-
-| Setting   | Default Value          | Client Override       |
-| --------- | ---------------------- | --------------------- |
-| Time      | `0800` (8:00 AM)       | TCU: `1600` (4:00 PM) |
-| Time Zone | `Central Standard Time`| —                     |
-
-Use `azurerm_dev_test_global_vm_shutdown_schedule`.
-
-### Cleanup Policy
-
-- Destroy lab/dev resources within 7 days.
-- Track via `DateCreated` tag.
-- Resources requiring persistence must justify in README.
+- Use `azurerm_dev_test_global_vm_shutdown_schedule` for VM auto-shutdown, with the time and time zone from governance §6.2.
+- Expose SKUs as variables with governance §6.1 values as defaults.
 
 ---
 
@@ -583,17 +516,7 @@ lifecycle {
 
 ## 15. Code Header
 
-Include in all `.tf` files:
-
-```hcl
-# -------------------------------------------------------------------------
-# Program: <filename>
-# Description: <purpose>
-# Context: <workspace context>
-# Author: Greg Tate
-# Date: <YYYY-MM-DD>
-# -------------------------------------------------------------------------
-```
+Include the header defined in `instructions/General Coding Guidelines.instructions.md` at the top of all `.tf` files, using `#` comments.
 
 ---
 
@@ -617,10 +540,11 @@ Include in all `.tf` files:
 
 When rules conflict, apply this precedence (highest wins):
 
-1. **Workspace-specific governance** (e.g., `Governance-Lab.md`, `terraform-governance.instructions.md`)
-2. **Azure Governance Guidelines** (`instructions/Azure Governance Guidelines.instructions.md`)
-3. **This skill** (general Terraform on Azure patterns)
-4. **General Coding Guidelines** (`instructions/General Coding Guidelines.instructions.md`)
+1. **Explicit user instruction** for the current task — state any deviation from the standards
+2. **Workspace-specific governance** (the workspace's own governance instructions)
+3. **Azure Governance Guidelines** (`instructions/Azure Governance Guidelines.instructions.md`)
+4. **This skill** (Terraform on Azure implementation patterns)
+5. **General Coding Guidelines** (`instructions/General Coding Guidelines.instructions.md`)
 
 ---
 

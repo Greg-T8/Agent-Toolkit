@@ -50,25 +50,25 @@ terraform/
 **Before:**
 ```terraform
 resource "azurerm_virtual_network" "vnet" {
-name="my-vnet"
-location="eastus"
-resource_group_name="rg-prod"
+name="vnet-core-01"
+location="centralus"
+resource_group_name="project-myapp-prod-network"
 address_space=["10.0.0.0/16"]
-tags={environment="production",owner="platform-team"}
+tags={Environment="Prod",Owner="Greg Tate"}
 }
 ```
 
 **After:**
 ```terraform
 resource "azurerm_virtual_network" "vnet" {
-  name                = "my-vnet"
-  location            = "eastus"
+  name                = "vnet-core-01"
+  location            = "centralus"
   resource_group_name = azurerm_resource_group.main.name
   address_space       = ["10.0.0.0/16"]
 
   tags = {
-    environment = "production"
-    owner       = "platform-team"
+    Environment = "Prod"
+    Owner       = "Greg Tate"
   }
 }
 ```
@@ -79,7 +79,7 @@ resource "azurerm_virtual_network" "vnet" {
 ```terraform
 variable "location" {
 type=string
-default="eastus"
+default="centralus"
 }
 variable "vm_size" {
 type=string
@@ -91,7 +91,7 @@ type=string
 variable "location" {
   description = "Azure region for resources"
   type        = string
-  default     = "eastus"
+  default     = "centralus"
 }
 
 variable "vm_size" {
@@ -99,7 +99,7 @@ variable "vm_size" {
   type        = string
 
   validation {
-    condition     = contains(["Standard_B2s", "Standard_D2s_v3", "Standard_D4s_v3"], var.vm_size)
+    condition     = contains(["Standard_B2s_v2", "Standard_B2ats_v2", "Standard_D2s_v5"], var.vm_size)
     error_message = "VM size must be a supported SKU."
   }
 }
@@ -140,8 +140,8 @@ module "network" {
 ```terraform
 data "azurerm_client_config" "current" {}
 locals {
-tags={env="prod",project="myapp",managed_by="terraform"}
-rg_name="${var.prefix}-rg-${var.environment}"
+tags={Environment="Prod",Workspace="MyApp",DeploymentMethod="Terraform"}
+rg_name="project-${var.workspace}-${var.environment}-${var.purpose}"
 }
 ```
 
@@ -153,12 +153,12 @@ data "azurerm_client_config" "current" {}
 # Common local values
 locals {
   common_tags = {
-    environment = "production"
-    project     = "myapp"
-    managed_by  = "terraform"
+    Environment      = "Prod"
+    Workspace        = "MyApp"
+    DeploymentMethod = "Terraform"
   }
 
-  resource_group_name = "${var.prefix}-rg-${var.environment}"
+  resource_group_name = "project-${var.workspace}-${var.environment}-${var.purpose}"
   location            = var.location
 }
 ```
@@ -240,7 +240,7 @@ output "subnet_ids" {
      required_providers {
        azurerm = {
          source  = "hashicorp/azurerm"
-         version = "~> 3.0"
+         version = "~> 4.0"
        }
      }
    }
@@ -392,4 +392,4 @@ output "vnet_name" {
 2. **Use sensitive = true** for outputs containing secrets
 3. **Implement least privilege** with Azure RBAC
 4. **Enable encryption** for storage accounts and disks
-5. **Use private endpoints** where applicable
+5. **Use private endpoints** only when specifically requested
