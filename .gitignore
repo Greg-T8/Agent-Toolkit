@@ -16,6 +16,9 @@ Desktop.ini
 *.pem
 *.key
 
+# Generated ChatGPT skill archives
+/skills/_bundles/
+
 # Temporary files and logs
 *.log
 *.tmp
@@ -49,3 +52,6 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+
+# Remove community modules from parent tracking
+/skills/community/
