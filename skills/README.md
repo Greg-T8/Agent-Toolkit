@@ -28,7 +28,16 @@ Version 1.0.1 adds Obra's writing-clearly-and-concisely skill, 1.1.0 adds the
 google-docs-design skill, 1.1.1 adds Matt Pocock's grill-me dispatcher with its
 grilling guidance, and 1.2.0 renames the design skill to google-workspace-design
 and adds the Google Sheets tracker design. Version 1.2.1 packages the current
-workspace-design and planning guidance in a local archive. Maintain the version and selections in
+workspace-design and planning guidance; 1.2.2 adds Docs procedure-step guidance
+and audits; 1.2.3 adds Docs specification and audit updates, including the new
+document audit script and rendered OPS-04 settings example; 1.2.4 adds Markdown
+export audits and clarifies audit routes and findings. Version 1.2.5 adds Docs
+structural rules and hard checks for fragmented prose and table/list errors.
+Version 1.2.6 adds the blank-paragraph-before-table rule and its matching hard
+check, and refines the audit's schema-table advisory. Version 1.2.7 adds the
+nested-list rule and audit for continuing numbered procedures after sub-lists.
+Version 1.2.8 sets the master Doc title in title case and adds a matching audit.
+Maintain the version and selections in
 [agent-toolkit.json](./bundles/agent-toolkit.json) and release notes in
 [agent-toolkit.changelog.md](./bundles/agent-toolkit.changelog.md), which also
 preserves the three predecessor histories. The shared document-and-checkmark

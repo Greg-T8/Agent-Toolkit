@@ -79,6 +79,7 @@ STYLES = {  # named style, text override, paragraph style
     "caption": ("NORMAL_TEXT", dict(weight=700, size=8.5, fg="meta", bold=True),
                 dict(spaceAbove=pt(6), spaceBelow=pt(2), keepWithNext=True)),
     "meta": ("NORMAL_TEXT", dict(size=10, fg="meta"), dict(spaceBelow=pt(14))),
+    "label_only": ("NORMAL_TEXT", {}, dict(spaceBelow=pt(3), keepWithNext=True)),
 }
 CHIPS = {"APPROVED": ("tip", "tip_t"), "DONE": ("tip", "tip_t"),
          "IN PROGRESS": ("note", "note_t"), "IN REVIEW": ("teal", "teal_t"),
@@ -91,9 +92,10 @@ def chip_ts(word):
 
 
 class B:
-    def __init__(self):
+    def __init__(self, start=1):
         self.struct, self.pst, self.style, self.late = [], [], [], []
-        self.cur, self.prev_table, self.extras = 1, False, 0
+        self.cur, self.prev_table, self.extras = start, False, 0
+        self.base_start = start
 
     def text(self, s, n, **kw):
         if n:
@@ -195,7 +197,7 @@ class B:
             self.struct.append({"deleteContentRange": {"range": {
                 "startIndex": self.cur, "endIndex": self.cur + self.extras}}})
         st, f = ts(font=BODY, weight=400, size=11, fg="body", bold=False)
-        base = {"updateTextStyle": {"range": {"startIndex": 1, "endIndex": self.cur},
+        base = {"updateTextStyle": {"range": {"startIndex": self.base_start, "endIndex": self.cur},
                                     "textStyle": st, "fields": f}}
         return self.struct + self.pst + [base] + self.style + self.late
 
@@ -223,7 +225,7 @@ def code(b, lines):
     b.table([[content]], [468], cb)
 
 
-def data_table(b, rows, widths):
+def data_table(b, rows, widths, mono_first=False):
     def cb(b, t, R, C, cells, rows):
         b.cells(t, 0, 0, R, C, "white", border="border", pad=(4, 7))
         b.cells(t, 0, 0, 1, C, "ink", border="border", pad=(4, 7))
@@ -234,7 +236,10 @@ def data_table(b, rows, widths):
                weight=700, bold=True, fg="white")
         for r in range(1, R):
             s, e = cells[(r, 0)]
-            b.text(s, e - 1 - s, weight=600)
+            if mono_first:
+                b.text(s, e - 1 - s, font=MONO, size=9.5)
+            else:
+                b.text(s, e - 1 - s, weight=600)
             for c in range(1, C):
                 v = rows[r][c].strip(NBSP)
                 if v in CHIPS:
@@ -249,9 +254,39 @@ def chip(word):
     return (f"{NBSP}{word}{NBSP}", chip_ts(word))
 
 
+LABEL = dict(weight=600, fg="ink")   # run-in label: Source Sans 3 600, Ink
+
+
+def label_code(b, label, lines):
+    """Action label paragraph followed directly by a code block (no caption)."""
+    b.para("label_only", [(label, LABEL)])
+    code(b, lines)
+
+
+def procedure_section(b):
+    b.para("h1", "Procedure steps")
+    b.para("body", "A procedure step is a Heading 2 followed by run-in labels in this order: "
+                   "Purpose, Action, Expected. Each label is semibold Ink and ends at its colon; "
+                   "the rest of the paragraph is regular body text. An Action label names where "
+                   "to run the step, and the command goes in a code block directly below it.")
+    b.para("h2", "OPS-03: Verify the scheduler")
+    b.para("body", [("Purpose:", LABEL), (" Confirm the scheduler is healthy before creating any jobs.", {})])
+    label_code(b, "Action (Ubuntu shell):", ["hermes cron status"])
+    b.para("body", [("Expected:", LABEL),
+                    (" The scheduler, heartbeat, and job store report healthy. Run ", {}),
+                    ("hermes cron list", dict(font=MONO, size=10)),
+                    (" next, as its own step.", {})])
+    callout(b, "Stop point", "Send the output for review. Leave OPS-03 pending until it is assessed.",
+            "warn", "warn_t")
+    b.para("body", [("A command named in a sentence, such as ", {}),
+                    ("hermes doctor", dict(font=MONO, size=10)),
+                    (", uses inline code. A command the reader runs always gets its own code block, "
+                     "even when it is one line. Never bold a whole paragraph: bold stops at the label.", {})])
+
+
 def main():
     b = B()
-    b.para("title", "Personal document template")
+    b.para("title", "Personal Document Template")
     b.para("subtitle", "Style reference for the Agent Toolkit documentation skill")
     b.para("meta", [chip("APPROVED"),
                     ("  Version 1.0  |  Updated November 25, 2026  |  Owner: Greg Tate", {})])
@@ -311,10 +346,54 @@ def main():
     b.para("caption", "POWERSHELL")
     code(b, ['Get-ScheduledTask -TaskName "NightlyCopy" |', "    Disable-ScheduledTask"])
     b.para("body", "Leave one normal paragraph after every table, callout, or code block.")
+    procedure_section(b)
+    settings_step(b)
     reqs = b.done()
     json.dump(reqs, sys.stdout, separators=(",", ":"), ensure_ascii=False)
     print(f"\nrequests={len(reqs)} cur={b.cur} extras={b.extras}", file=sys.stderr)
 
 
+def code_run(t):
+    return (t, dict(font=MONO, size=10))
+
+
+def settings_step(b):
+    """A step whose Action sets values: lead-in, real list, schema table, warning."""
+    b.para("h2", "OPS-04: Configure log retention")
+    b.para("body", [("Purpose:", LABEL), (" Keep log storage bounded without losing the reporting window.", {})])
+    b.para("body", [("Action:", LABEL), (" Set these retention values:", {})])
+    b.para("item", [("Retention:", LABEL), (" 14 days, based on ", {}), code_run("collected_utc")],
+           bullet="BULLET_DISC_CIRCLE_SQUARE")
+    b.para("item", [("Reporting window:", LABEL), (" filter on ", {}), code_run("published_utc")],
+           bullet="BULLET_DISC_CIRCLE_SQUARE")
+    b.para("body", [("Processed flag:", LABEL), (" none; do not add a global flag", {})],
+           bullet="BULLET_DISC_CIRCLE_SQUARE")
+    b.para("body", [("The ", {}), code_run("LogEntries"), (" table stores these fields:", {})])
+    data_table(b, [["Field", "Type", "Purpose"],
+                   ["collected_utc", "DateTime", "When the record was collected; drives retention"],
+                   ["published_utc", "DateTime", "When the source published it; drives the report window"],
+                   ["source_id", "String", "Stable ID in the form platform:identifier"]],
+               [130, 90, 248], mono_first=True)
+    callout(b, "Warning", "Do not enable automatic deletion until a restore test passes on "
+                          "production-like records.", "warn", "warn_t")
+    b.para("body", [("Expected:", LABEL), (" A record older than 14 days by ", {}), code_run("collected_utc"),
+                    (" is flagged for cleanup, and automatic deletion stays off.", {})])
+
+
+def append_procedures(start):
+    """Requests that append only the Procedure steps section at body index `start`."""
+    b = B(start)
+    procedure_section(b)
+    return b.done()
+
+
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 2 and sys.argv[1] == "--append-settings":
+        b = B(int(sys.argv[2]))
+        settings_step(b)
+        json.dump(b.done(), sys.stdout, separators=(",", ":"), ensure_ascii=False)
+    elif len(sys.argv) > 2 and sys.argv[1] == "--append-procedures":
+        json.dump(append_procedures(int(sys.argv[2])), sys.stdout, separators=(",", ":"),
+                  ensure_ascii=False)
+    else:
+        main()
