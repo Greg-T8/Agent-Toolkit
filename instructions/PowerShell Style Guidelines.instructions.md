@@ -7,24 +7,30 @@ description: "This file contains the PowerShell scripting standards and guidelin
 
 ## 1) Modes
 
-### Mode A — Create a new script
+### Mode A — Interactive CLI commands
+
+* Provide concise PowerShell commands intended to be copied and pasted directly into an interactive CLI.
+* Use the shortest clear solution that accomplishes the requested task; retain necessary safeguards and error handling.
+* Script-file structure, headers, regions, and function requirements do not apply to interactive commands.
+
+### Mode B — Create a new script
 
 * You MAY add code, functions, output, and error handling.
 * You MUST follow the Required Script Structure.
 
-### Mode B — Edit an existing script (non-functional changes only)
+### Mode C — Edit an existing script
 
-* You MUST NOT change behavior.
-* Allowed changes: comments, whitespace, formatting, line breaks, casing, and expanding aliases.
-* You MUST NOT add/remove commands, parameters, logic branches, output, or side effects.
+* Make the changes requested by the user and preserve unrelated behavior and existing conventions.
+* Functional changes are allowed when requested. Apply the script standards to new and modified code without unnecessary restructuring.
+* For explicitly comment-only, format-only, or other non-functional requests, preserve behavior. Do not add or remove commands, parameters, logic branches, output, or side effects.
 
-> Default mode: Mode A unless the user explicitly asks for “comment-only”, “format-only”, “no behavior changes”, or similar.
+> Default to Mode A unless the user asks to create a script (Mode B), edit an existing script (Mode C), or explicitly selects another mode.
 
 ---
 
-## 2) Required Script Structure (Mode A)
+## 2) Required Script Structure (Mode B)
 
-All scripts MUST follow this exact order:
+New scripts in Mode B MUST follow this exact order:
 
 1. Comment-based help header (at the very top)
 2. `[CmdletBinding()]` then `param()` (even if empty param block is not needed, omit param entirely)
@@ -108,7 +114,7 @@ finally {
 
 ### 3.3 Aliases
 
-* In Mode A and Mode B, expand common aliases:
+* In Modes B and C, expand common aliases in new or modified code:
 
   * `?` → `Where-Object`
   * `select` → `Select-Object`
@@ -194,18 +200,18 @@ function Get-CurrentAzProfile {
 
 ## 5) Commenting
 
-### 5.1 Function comment requirement (Mode A)
+### 5.1 Function comment requirement (Modes B and C)
 
-* Each function MUST start with a one-line comment describing intent (what, not how).
+* Each new or modified function MUST start with a one-line comment describing intent (what, not how).
 
-### 5.2 Block comments (Mode A)
+### 5.2 Block comments (Modes B and C)
 
 * Add a short intent comment above non-trivial blocks:
 
   * `if/elseif/else`, `switch`, loops, `try/catch/finally`
 * Comments describe intent, not mechanics.
 
-### 5.3 Mode B comment rule (non-functional edits only)
+### 5.3 Mode C comment rule (non-functional edits only)
 
 * You MAY add comments only if they do not require adding/removing blank lines.
 * You MUST NOT insert blank lines solely to justify a comment.
@@ -219,7 +225,7 @@ function Get-CurrentAzProfile {
 
 ---
 
-## 7) Example skeleton (Mode A)
+## 7) Example skeleton (Mode B)
 
 ```powershell
 <#
