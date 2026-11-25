@@ -3,7 +3,7 @@ name: implementation-planning
 description: Create or update a project implementation plan and linked task tracker. Default to an editable Word plan and a native Google Sheets tracker with phases, dependencies, acceptance criteria, and evidence-based status.
 metadata:
   author: Greg Tate
-  version: "0.1.0"
+  version: "0.1.1"
 ---
 
 # Create an implementation plan and task tracker
@@ -77,6 +77,9 @@ use its required spreadsheet authoring/import route and verify the result is
 native Google Sheets. For an explicitly selected native tracker template, use
 the Sheets template-copy workflow and verify the new destination ID. For an
 existing tracker, read metadata and bounded ranges before scoped edits.
+Format the tracker with the google-workspace-design skill's Sheets spec:
+Overview page, banded data tabs, dropdowns, and status colors. The artifact
+contract still decides the tabs, columns, and content.
 
 Use the user's destination when supplied; otherwise follow the Google Sheets
 skill's location default. Do not substitute a local Excel file or CSV for the

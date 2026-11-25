@@ -22,9 +22,13 @@ Run from the Agent-Toolkit root using PowerShell 7 and Git:
 ## Agent Toolkit bundle
 
 **Agent Toolkit** is the single bundle for documentation, implementation planning,
-and coding guidance. It includes all eight skills from the former documentation
+and coding guidance. It includes the skills from the former documentation
 (0.2.3), coding-guidelines (0.1.5), and implementation-planning (0.1.0) bundles.
-Its new identity starts at version 1.0.0. Maintain the version and selections in
+Version 1.0.1 adds Obra's writing-clearly-and-concisely skill, 1.1.0 adds the
+google-docs-design skill, 1.1.1 adds Matt Pocock's grill-me dispatcher with its
+grilling guidance, and 1.2.0 renames the design skill to google-workspace-design
+and adds the Google Sheets tracker design. Version 1.2.1 packages the current
+workspace-design and planning guidance in a local archive. Maintain the version and selections in
 [agent-toolkit.json](./bundles/agent-toolkit.json) and release notes in
 [agent-toolkit.changelog.md](./bundles/agent-toolkit.changelog.md), which also
 preserves the three predecessor histories. The shared document-and-checkmark
@@ -52,6 +56,26 @@ skills directory, `~/.agents/skills/implementation-planning`. A directory link
 keeps the maintained repository copy authoritative. Invoke it with
 `$implementation-planning`, for example: "Create a Word implementation plan and
 a Google Sheets task tracker for this project using its existing documents."
+
+## Google Workspace design skill
+
+[Google Workspace design](./personal/google-workspace-design/SKILL.md) gives
+native Google Docs and Sheets a consistent personal look from one
+[shared palette](./personal/google-workspace-design/references/palette.md):
+Poppins, Source Sans 3, and JetBrains Mono type; a multi-accent color set; and
+one status color vocabulary. The
+[Docs spec](./personal/google-workspace-design/references/docs-spec.md) covers
+the title block, callouts, code blocks, tables, and status chips. The
+[Sheets spec](./personal/google-workspace-design/references/sheets-spec.md)
+covers implementation-planning task trackers: an Overview page and banded data
+tabs with dropdowns and status colors. The
+[master Doc](https://docs.google.com/document/d/1kIyDWS-94bJnd8DMOh0CyuT0KQCYLdX8f-RK_UPj5kY/edit)
+and [master tracker](https://docs.google.com/spreadsheets/d/1wqDjwWAfDV8x-0xfHKqttQSARyZORg2QpGeIzEgxdRw/edit)
+render every component and can serve as ChatGPT template reference files. Both
+are in the [Agent Toolkit Templates](https://drive.google.com/drive/folders/1gm07fxx16bvRZuDfAH5idGONyFDXbZiw) folder in Google Drive. The
+skill applies only to native Google files and does not change another skill's
+Word default. Change the palette or a spec first, then the master file, then
+rebuild and re-import the bundle.
 
 ## Coding-guidelines synchronization
 

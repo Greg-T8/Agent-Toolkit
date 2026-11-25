@@ -1,5 +1,30 @@
 # Agent Toolkit bundle changelog
 
+## 1.2.1 - 2026-11-25
+
+- Packaged the current Google Workspace design skill with its shared palette, separate Docs and Sheets specifications, and refreshed tracker workflow in implementation-planning.
+- The prior local archive was 1.1.1, so the documented 1.2.0 design updates were present in the configuration but not yet in a packaged archive.
+
+## 1.2.0 - 2026-11-25
+
+- Renamed google-docs-design to google-workspace-design and split its spec into a shared palette, a Docs spec, and a new Sheets spec.
+- Added the Google Sheets design for implementation-planning task trackers: an Overview with formula-driven summary tiles, status counts, phase gates, and a focus block; banded data tabs with frozen headers, filters, dropdowns, and status colors. The approved master tracker is the visual reference, and a script regenerates it.
+- Changed the In Review status color from blue to teal in both specs so it differs from In Progress.
+- Pointed implementation-planning's tracker step at the Sheets spec.
+
+## 1.1.1 - 2026-11-25
+
+- Added Matt Pocock's grill-me dispatcher and its grilling interview guidance so the bundled workflow includes both the entry point and its referenced skill.
+
+## 1.1.0 - 2026-11-25
+
+- Added the google-docs-design skill: a personal palette, type scale, and component recipes (title block, callouts, code blocks, data tables, status chips) for native Google Docs, with the approved master Doc as its visual reference.
+- Included the Docs API build rules learned while building the master Doc, a read-back verification checklist, and a script that regenerates the master Doc.
+
+## 1.0.1 - 2026-11-25
+
+- Added Obra's writing-clearly-and-concisely skill for clearer, more concise prose across documentation, messages, reports, explanations, and interface text.
+
 ## 1.0.0 - 2026-11-25
 
 - Consolidated the documentation, coding-guidelines, and implementation-planning bundles into one Agent Toolkit plugin containing all eight selected skills.

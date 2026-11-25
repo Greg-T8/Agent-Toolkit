@@ -1,0 +1,4 @@
+interface:
+  display_name: "Google Workspace Design"
+  short_description: "Personal palette, type, and layouts for native Google Docs and Sheets"
+  default_prompt: "Use $google-workspace-design to format this native Google Doc or Sheet with my personal template."
