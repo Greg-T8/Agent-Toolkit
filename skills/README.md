@@ -2,37 +2,67 @@
 
 [Package-Skills.ps1](./Package-Skills.ps1) combines explicitly selected personal and
 community skills into a plugin ZIP for ChatGPT. Choose the source folders
-in [bundles/documentation.json](./bundles/documentation.json). Generated archives
+in [bundles/agent-toolkit.json](./bundles/agent-toolkit.json). Generated archives
 go to `_bundles/`, which is excluded from Git.
 
 Run from the Agent-Toolkit root using PowerShell 7 and Git:
 
 ```powershell
-# Preview the configured selections without creating files.
-./skills/Package-Skills.ps1 -WhatIf
+# Preview the unified build without copying references or creating files.
+./skills/Build-SkillBundle.ps1 -WhatIf
 
-# Build the default documentation bundle.
-./skills/Package-Skills.ps1
+# Refresh coding guidance and build Agent Toolkit.
+./skills/Build-SkillBundle.ps1
 
 # Build another selection or use a different destination and enclosing layout.
 ./skills/Package-Skills.ps1 -ConfigPath ./skills/bundles/my-bundle.json
 ./skills/Package-Skills.ps1 -Format Skill -OutputDirectory ./release -Layout Folder
 ```
 
-## Coding-guidelines bundle
+## Agent Toolkit bundle
 
-Build the standalone coding-guidelines plugin with:
+**Agent Toolkit** is the single bundle for documentation, implementation planning,
+and coding guidance. It includes all eight skills from the former documentation
+(0.2.3), coding-guidelines (0.1.5), and implementation-planning (0.1.0) bundles.
+Its new identity starts at version 1.0.0. Maintain the version and selections in
+[agent-toolkit.json](./bundles/agent-toolkit.json) and release notes in
+[agent-toolkit.changelog.md](./bundles/agent-toolkit.changelog.md), which also
+preserves the three predecessor histories. The shared document-and-checkmark
+icon represents the combined workflow.
 
-```powershell
-./skills/Build-CodingGuidelinesBundle.ps1
-```
+Upload `_bundles/agent-toolkit.plugin.zip` in ChatGPT's New Plugin dialog.
+After verifying the unified plugin, remove the three previous plugins from
+ChatGPT to avoid duplicate guidance. Previous local archives are retained under
+`_bundles/legacy/`; they are historical builds, not active configurations.
 
-The build first refreshes the general, PowerShell, and Shell instruction copies
-inside `personal/coding-guidelines/references`, then packages only that skill
-using [bundles/coding-guidelines.json](./bundles/coding-guidelines.json). The
-plugin archive is written to `_bundles/agent-toolkit-coding-guidelines.plugin.zip`.
+## Implementation-planning skill
+
+[Implementation planning](./personal/implementation-planning/SKILL.md) creates
+paired Word implementation plans and native Google Sheets task trackers. It uses
+the planning patterns from the M365 Knowledge Automation, Hermes, and ALZ runner
+migration examples, with stable identifiers, phase gates, and evidence-based
+progress. Its references retain source links without copying project documents.
+
+The unified bundle includes the planning skill and its supporting references.
+It contains workflow instructions; Word authoring and connected Google Sheets
+capabilities must be available in the destination environment.
+
+For local Codex discovery, expose the physical source skill folder under the user
+skills directory, `~/.agents/skills/implementation-planning`. A directory link
+keeps the maintained repository copy authoritative. Invoke it with
+`$implementation-planning`, for example: "Create a Word implementation plan and
+a Google Sheets task tracker for this project using its existing documents."
+
+## Coding-guidelines synchronization
+
+The unified build first refreshes the general, PowerShell, and Shell instruction copies
+inside `personal/coding-guidelines/references`, then packages all selected skills
+using [bundles/agent-toolkit.json](./bundles/agent-toolkit.json). The
+plugin archive is written to `_bundles/agent-toolkit.plugin.zip`.
 Run [Sync-CodingGuidelines.ps1](./Sync-CodingGuidelines.ps1) by itself to refresh
 the embedded references without building the archive.
+The lower-level [Package-Skills.ps1](./Package-Skills.ps1) uses the same default
+configuration but does not synchronize instruction copies on its own.
 
 The command returns the output path, status, selected skill count, entry count,
 and size. Rebuilding replaces only the bundle with the same name. Other bundles
@@ -41,8 +71,8 @@ from that bundle on the next successful build.
 
 ## Choose skills
 
-Copy [bundles/documentation.json](./bundles/documentation.json) to define another
-bundle. Give each bundle a distinct name. `name`, `version`, `description`, and
+Edit [bundles/agent-toolkit.json](./bundles/agent-toolkit.json) to maintain the
+shared selection. `name`, `version`, `description`, and
 `skills` are required; unknown configuration keys are rejected.
 An optional `icon` names a PNG directly under `skills/bundles/`, relative to
 `skills/`. Plugin builds include it and reference it as the plugin logo and
@@ -96,7 +126,7 @@ The default archive contains:
 ```text
 plugin.json
 skills/
-  agent-toolkit-documentation/
+  agent-toolkit/
     SKILL.md
     bundle-manifest.json
     references/skills/...
@@ -146,9 +176,7 @@ on success or failure. `-WhatIf` performs read-only preflight and reports the ta
 without creating an output directory. Custom output cannot be placed in personal
 or community source directories.
 
-Run the isolated filesystem regression checks with PowerShell 7:
-
-```powershell
-# Exercise archive contents, invalid inputs, replacement, and preview behavior.
-./skills/tests/Test-PackageSkills.ps1
-```
+Use the unified build's `-WhatIf` preview to validate selections before packaging.
+The previously documented `tests/Test-PackageSkills.ps1` is absent from this
+checkout. Verify the generated plugin manifest, embedded bundle version, selected
+skill inventory, file hashes, and changelog when checking a local release.

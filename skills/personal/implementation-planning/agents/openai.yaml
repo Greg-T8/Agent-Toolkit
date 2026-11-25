@@ -1,0 +1,4 @@
+interface:
+  display_name: "Implementation Planning"
+  short_description: "Word implementation plans and Google Sheets task trackers"
+  default_prompt: "Use $implementation-planning to create a Word implementation plan and a linked Google Sheets task tracker for this project, grounded in its existing documents."

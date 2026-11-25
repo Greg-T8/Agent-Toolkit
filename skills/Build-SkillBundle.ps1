@@ -1,18 +1,20 @@
 # ---------------------------------------------------------------------------
-# Description   : Refresh and package the coding-guidelines skill bundle
+# Description   : Refresh coding guidance and package the Agent Toolkit bundle
 # Context       : Agent-Toolkit - portable ChatGPT skill distribution
 # Author        : Greg Tate & coding agent
 # Last Modified : 2026-11-25
 # Revision History:
+#   2026-11-25 - Consolidate all skills into the Agent Toolkit build
 #   2026-11-25 - Initial version
 # ---------------------------------------------------------------------------
 <#
 .SYNOPSIS
-    Refresh and package the coding-guidelines skill bundle.
+    Refresh coding guidance and package the Agent Toolkit bundle.
 
 .DESCRIPTION
     Copies the selected instruction files into the personal skill and invokes
-    the shared packager with the dedicated coding-guidelines bundle manifest.
+    the shared packager with the consolidated Agent Toolkit bundle manifest.
+    Supports -WhatIf without synchronizing references or writing an archive.
 
 .PARAMETER OutputDirectory
     Destination directory for the generated plugin archive.
@@ -25,22 +27,22 @@
 #>
 #requires -Version 7.0
 
-[CmdletBinding()]
+[CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
 param(
     [string]$OutputDirectory = (Join-Path $PSScriptRoot '_bundles')
 )
 
-# Resolve the dedicated bundle inputs relative to this script.
+# Resolve the consolidated bundle inputs relative to this script.
 $SyncScriptPath    = Join-Path $PSScriptRoot 'Sync-CodingGuidelines.ps1'
 $PackageScriptPath = Join-Path $PSScriptRoot 'Package-Skills.ps1'
-$BundleConfigPath  = Join-Path $PSScriptRoot 'bundles\coding-guidelines.json'
+$BundleConfigPath  = Join-Path $PSScriptRoot 'bundles\agent-toolkit.json'
 
 # Keep the build sequence to synchronization followed by shared packaging.
 $Main = {
     . $Helpers
 
     Invoke-CodingGuidelineSync
-    New-CodingGuidelineBundle
+    New-SkillBundle
 }
 
 # Keep child-process details out of the high-level build sequence.
@@ -50,8 +52,8 @@ $Helpers = {
         & $SyncScriptPath
     }
 
-    function New-CodingGuidelineBundle {
-        # Use the shared packager with only the dedicated coding-guidelines manifest.
+    function New-SkillBundle {
+        # Package every selected skill using the consolidated manifest.
         & $PackageScriptPath -ConfigPath $BundleConfigPath -OutputDirectory $OutputDirectory
     }
 }

@@ -4,6 +4,8 @@
 # Author        : Greg Tate & coding agent
 # Last Modified : 2026-11-25
 # Revision History:
+#   2026-11-25 - Default to the consolidated Agent Toolkit bundle
+#   2026-11-25 - Allow a display name without plugin icons
 #   2026-11-25 - Support a separate plugin display name
 #   2026-11-25 - Support a separate composer icon
 #   2026-11-25 - Include the bundle changelog in the generated skill
@@ -43,7 +45,7 @@
     ./skills/Package-Skills.ps1 -WhatIf
 
 .EXAMPLE
-    ./skills/Package-Skills.ps1 -ConfigPath ./skills/bundles/documentation.json
+    ./skills/Package-Skills.ps1 -ConfigPath ./skills/bundles/agent-toolkit.json
 
 .CONTEXT
     Agent-Toolkit - manual ChatGPT skill import from maintained source folders.
@@ -55,7 +57,7 @@
 
 [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
 param(
-    [string]$ConfigPath = (Join-Path $PSScriptRoot 'bundles/documentation.json'),
+    [string]$ConfigPath = (Join-Path $PSScriptRoot 'bundles/agent-toolkit.json'),
     [string]$OutputDirectory = (Join-Path $PSScriptRoot '_bundles'),
     [ValidateSet('Plugin', 'Skill')]
     [string]$Format = 'Plugin',
@@ -429,7 +431,7 @@ $Helpers = {
                         $PluginManifest.extensions = @{ 'com.openai' = @{ interface = $Interface } }
                     }
                     if ($Definition.Contains('displayName')) {
-                        if ($null -eq $PluginManifest.extensions) {
+                        if (-not $PluginManifest.Contains('extensions')) {
                             $PluginManifest.extensions = @{ 'com.openai' = @{ interface = @{} } }
                         }
                         $PluginManifest.extensions['com.openai'].interface.displayName = $Definition.displayName

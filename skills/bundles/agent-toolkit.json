@@ -1,0 +1,17 @@
+{
+  "name": "agent-toolkit",
+  "displayName": "Agent Toolkit",
+  "version": "1.0.0",
+  "icon": "bundles/agent-toolkit.png",
+  "description": "Write, structure, review, and improve technical documents and clear professional prose; create or update Word implementation plans and linked Google Sheets task trackers; resolve document links; and apply Greg Tate's general, PowerShell, and Shell coding guidance before editing scripts.",
+  "skills": [
+    "personal/coding-guidelines",
+    "personal/implementation-planning",
+    "community/wondelai/technical-documentation",
+    "community/practicalswan/documentation-authoring",
+    "community/practicalswan/documentation-patterns",
+    "community/practicalswan/documentation-quality",
+    "community/practicalswan/avoid-ai-writing",
+    "personal/markdown-link-resolver"
+  ]
+}
