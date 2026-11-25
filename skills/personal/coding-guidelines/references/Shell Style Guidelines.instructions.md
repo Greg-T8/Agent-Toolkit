@@ -3,33 +3,99 @@ applyTo: "**/*.sh"
 description: "This file contains the shell scripting standards and guidelines for Copilot."
 ---
 
-# Generating Shell Scripts with Proper Style (Linux/POSIX)
+# Shell Standards for Copilot (Linux/POSIX)
 
-Refactor the shell script so that it adheres to the following style guidelines:
+## 1) Modes
 
-## Formatting Shell Commands for Revision
+### Mode A — Interactive CLI commands
 
-When providing a shell command that is longer than one line, follow these guidelines to ensure proper style and readability:
+* Provide concise shell commands intended to be copied and pasted directly into an interactive CLI.
+* Use the shortest clear solution that accomplishes the requested task; retain necessary safeguards and error handling.
+* Script-file structure, headers, and function requirements do not apply to interactive commands.
 
-### Line Breaking Guidelines
+### Mode B — Create a new script
 
-1. **Break long one-liners across multiple lines** to improve readability
-2. **Prioritize using the pipe (`|`) for line breaks** - place each pipe segment on its own line
-3. **Use the backslash (`\`) character for line continuation** when breaking lines that don't naturally break at a pipe
-4. **Indent continuation lines** to show logical grouping and hierarchy (typically 4 spaces or 1 tab)
-5. **Place operators at the end of lines** when breaking (e.g., `\`, `|`, `&&`, `||`)
-6. **Keep related options together** when breaking command arguments
+* You MAY add code, functions, output, and error handling.
+* You MUST follow the Required Script Structure.
 
-### Formatting Examples
+### Mode C — Edit an existing script
 
-#### Example 1: Long Command with Pipes
+* Make the changes requested by the user and preserve unrelated behavior and existing conventions.
+* Functional changes are allowed when requested. Apply the script standards to new and modified code without unnecessary restructuring.
+* For explicitly comment-only, format-only, or other non-functional requests, preserve behavior. Do not add or remove commands, parameters, logic branches, output, or side effects.
 
-**Before:**
+> Default to Mode A unless the user asks to create a script (Mode B), edit an existing script (Mode C), or explicitly selects another mode.
+
+---
+
+## 2) Required Script Structure (Mode B)
+
+New scripts in Mode B MUST follow this order:
+
+1. Shebang, followed by a comment header
+2. Strict-mode and shell options, selected for the script's intended shell and error-handling needs
+3. Script-level configuration and constants
+4. `main()` function containing high-level orchestration
+5. Helper function definitions
+6. Entry point that calls `main "$@"`
+
+### 2.1 Header template (required)
+
 ```bash
-ps aux | grep -v grep | grep python | awk '{print $2, $11}' | sort -k2
+#!/usr/bin/env bash
+
+# ---------------------------------------------------------------------------
+# Description   : Brief description of what the script does
+# Context       : Context information (e.g., project, course, or book)
+# Author        : Greg Tate & coding agent
+# Last Modified : YYYY-MM-DD
+# Revision History:
+#   YYYY-MM-DD - Initial version
+# ---------------------------------------------------------------------------
 ```
 
-**After:**
+* Keep the description concise; wrap continuation lines so their text begins under the description or context value.
+* Use ISO 8601 dates (`YYYY-MM-DD`). Preserve existing dates and revision-history entries when editing; put the newest entry first.
+
+### 2.2 Main function
+
+* Define `main()` before helper functions and call it at the end of the script.
+* Keep `main()` limited to high-level orchestration so it reads like an outline of the script.
+* Pass script arguments through with `main "$@"` when the script accepts arguments or may need them later.
+
+### 2.3 Helper functions
+
+* Put implementation details in helper functions defined after `main()`.
+* Keep functions small and single-purpose, with lowercase names and underscores between words.
+* Use descriptive verb-led names, such as `get_data`, `process_data`, or `validate_input`.
+* Use `local` for function-scoped variables.
+
+### 2.4 Entry point
+
+Call `main` at the bottom of the script, passing `"$@"` to preserve argument boundaries.
+
+---
+
+## 3) Formatting and Readability (Modes B and C)
+
+### 3.1 Indentation and line breaks
+
+* Use four spaces for indentation; do not use tabs.
+* Break long one-line commands across multiple lines when it improves readability.
+* Prefer one pipeline segment per line, placing the pipe at the end of the preceding line.
+* Use `\` for line continuation when a command does not naturally break at a pipe.
+* Indent continuation lines to show their grouping and hierarchy.
+* Keep related options together; group short flags when appropriate and separate long options for clarity.
+* Keep logical operators visible at the ends of lines. For example:
+
+```bash
+command1 && \
+    command2 || \
+    handle_error
+```
+
+#### Pipeline
+
 ```bash
 ps aux |
     grep -v grep |
@@ -38,14 +104,8 @@ ps aux |
     sort -k2
 ```
 
-#### Example 2: Command with Many Arguments
+#### Command with many arguments
 
-**Before:**
-```bash
-docker run -d --name myapp -p 8080:8080 -e NODE_ENV=production -e DB_HOST=localhost -e DB_PORT=5432 -v /data:/app/data --restart unless-stopped myapp:latest
-```
-
-**After:**
 ```bash
 docker run -d \
     --name myapp \
@@ -58,38 +118,8 @@ docker run -d \
     myapp:latest
 ```
 
-#### Example 3: Complex Find Command
+#### Here-document
 
-**Before:**
-```bash
-find /var/log -type f -name "*.log" -mtime +30 -exec gzip {} \; -exec mv {}.gz /archive/ \;
-```
-
-**After:**
-```bash
-find /var/log \
-    -type f \
-    -name "*.log" \
-    -mtime +30 \
-    -exec gzip {} \; \
-    -exec mv {}.gz /archive/ \;
-```
-
-#### Example 4: Multiline String with Here-Document
-
-**Before:**
-```bash
-cat > config.yaml << EOF
-server:
-  host: localhost
-  port: 8080
-database:
-  host: db.example.com
-  port: 5432
-EOF
-```
-
-**After (when inline):**
 ```bash
 cat > config.yaml << 'EOF'
 server:
@@ -101,141 +131,80 @@ database:
 EOF
 ```
 
-#### Example 5: Conditional Logic
+### 3.2 Quoting and command substitution
 
-**Before:**
-```bash
-if [ -f /etc/config ]; then source /etc/config && validate_config && start_service || exit 1; fi
-```
+* Quote variable expansions as `"$variable"` unless intentional word splitting or glob expansion is required.
+* Use `$(...)` instead of backticks for command substitution.
+* Quote here-document delimiters when expansion is not wanted, such as `<< 'EOF'`.
+* Use here-documents for multi-line strings instead of multiple `echo` commands.
 
-**After:**
-```bash
-if [ -f /etc/config ]; then
-    source /etc/config && \
-        validate_config && \
-        start_service || exit 1
-fi
-```
+### 3.3 Shell behavior and portability
 
-#### Example 6: Git Command with Multiple Options
+* Match syntax to the interpreter named by the shebang. Use `[[ ]]` only for Bash scripts; use POSIX `[ ]` for scripts that must run under a POSIX shell.
+* Consider `set -euo pipefail` for Bash scripts, but account for its behavior and exceptions rather than applying it mechanically.
+* Check command success where subsequent work depends on it, and handle failures intentionally.
+* Use `readonly` for script constants and configuration values that should not change.
 
-**Before:**
-```bash
-git log --pretty=format:"%h %ad | %s%d [%an]" --graph --date=short --since="2 weeks ago" --author="John" --no-merges
-```
+### 3.4 Blank lines and comments
 
-**After:**
-```bash
-git log \
-    --pretty=format:"%h %ad | %s%d [%an]" \
-    --graph \
-    --date=short \
-    --since="2 weeks ago" \
-    --author="John" \
-    --no-merges
-```
+* Use blank lines to separate logical groups and function definitions.
+* Add comments that explain intent when required by the general coding guidelines; avoid comments that merely restate the command.
+* Apply formatting and commenting rules to new and modified code. For formatting-only requests, preserve program behavior.
 
-### Key Improvements to Apply
+---
 
-- **Group related options together:**
-  - Keep short flags grouped when appropriate: `-rf` instead of `-r \n -f`
-  - Separate long options: `--verbose --dry-run`
+## 4) Other Requirements (Modes B and C)
 
-- **Use consistent indentation** (4 spaces recommended)
+* Provide usage or help text for scripts that accept arguments.
+* Use meaningful variable names; avoid single-letter names except for simple loop counters.
+* Check command success before proceeding when failure would make later steps unsafe or misleading.
+* Use `:` as a placeholder only when an intentionally empty function body is needed.
 
-- **Align similar elements** for visual clarity when beneficial:
-  ```bash
-  -e VAR1=value1 \
-  -e VAR2=value2 \
-  -e VAR3=value3
-  ```
+### Common Verb Mapping
 
-- **Keep logical operators visible:**
-  - Place `&&`, `||`, `|` at the end of lines before the backslash
-  - Example: `command1 && \`
+* Check or validate → `check_` or `validate_`
+* Display or print → `show_` or `print_`
+* Create or make → `create_` or `make_`
+* Delete or remove → `remove_` or `delete_`
+* Update or modify → `update_` or `modify_`
 
-- **Use here-documents for multi-line strings** instead of multiple echo commands
+---
 
-- **Quote variables** to prevent word splitting: `"$variable"` instead of `$variable`
-
-## General Program Structure
+## 5) Example Skeleton (Mode B)
 
 ```bash
 #!/usr/bin/env bash
 
-# -------------------------------------------------------------------------
-# Program: script-name.sh
-# Description: Brief description of what the script does
-# Context: Context information (e.g., project, course, etc.)
-# Author: Greg Tate
-# -------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Description   : Retrieve, process, and save data
+# Context       : Example project script
+# Author        : Greg Tate & coding agent
+# Last Modified : YYYY-MM-DD
+# Revision History:
+#   YYYY-MM-DD - Initial version
+# ---------------------------------------------------------------------------
 
-set -euo pipefail  # Exit on error, undefined variable, pipe failure
+set -euo pipefail
 
-# Global variables
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 
-# Main function
 main() {
-    # Main logic that includes a small number of high-level function calls
-    # Intention is for the reader to quickly understand what the script does
-
     get_data
     process_data
     save_results
 }
 
-# Helper functions
 get_data() {
-    # Function to retrieve data from a source
-    # Implementation details go here
     :
 }
 
 process_data() {
-    # Function to process the retrieved data
-    # Implementation details go here
     :
 }
 
 save_results() {
-    # Function to save the processed results
-    # Implementation details go here
     :
 }
 
-# Entry point
 main "$@"
 ```
-
-### Notes on General Structure
-
-* The `main()` function should be defined early (place it near the top) and called at the end
-* Use `set -euo pipefail` for safer script execution
-* Define constants with `readonly` at the top
-* Use lowercase with underscores for function names (following POSIX convention)
-* The `"$@"` passes all script arguments to the main function
-* Use `:` (null command) as a placeholder in empty functions
-
-## Other Requirements
-
-* **Use descriptive function names** with verbs (e.g., `get_`, `process_`, `validate_`, `check_`)
-* **Keep function names in lowercase** with underscores separating words
-* **Use meaningful variable names** - avoid single letters except for loop counters
-* **Quote all variables** unless you specifically need word splitting
-* **Check command success** before proceeding: `command || handle_error`
-* **Provide usage/help** for scripts that accept arguments
-* **Use `local` keyword** for variables inside functions
-* **Prefer `[[ ]]` over `[ ]`** for conditional tests in bash (more features, safer)
-* **Use `$()` instead of backticks** for command substitution
-
-### Common Verb Mapping
-
-* Check/Validate → `check_` or `validate_`
-* Display/Print → `show_` or `print_`
-* Create/Make → `create_` or `make_`
-* Delete/Remove → `remove_` or `delete_`
-* Update/Modify → `update_` or `modify_`
-
-````

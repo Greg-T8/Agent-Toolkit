@@ -1,5 +1,10 @@
 ﻿# Coding-guidelines bundle changelog
 
+## 0.1.5 - 2026-11-25
+
+- Added interactive-command, new-script, and existing-script modes to the Shell style guide, aligned with the PowerShell guide.
+- Added a required shell script structure and header, with Bash and POSIX portability guidance.
+
 ## 0.1.4 — 2026-11-25
 
 - Set the plugin display name to Agent Toolkit - Coding Guidelines.
