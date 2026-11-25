@@ -97,6 +97,14 @@ finally {
   * One pipeline segment per line.
 * Use backticks ONLY for long parameter lists when a pipeline is not appropriate.
 * Align hashtable keys for readability.
+* Align the `=` operators in consecutive assignment statements that belong to
+  the same logical group. Add spacing before `=` as needed:
+
+  ```powershell
+  $SyncScriptPath    = Join-Path $PSScriptRoot 'Sync-CodingGuidelines.ps1'
+  $PackageScriptPath = Join-Path $PSScriptRoot 'Package-Skills.ps1'
+  $BundleConfigPath  = Join-Path $PSScriptRoot 'bundles\coding-guidelines.json'
+  ```
 
 ### 3.3 Aliases
 
