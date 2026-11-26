@@ -18,12 +18,21 @@ paragraphs, one-item lists after a lead-in, sentences split across a list,
 arrow chains in paragraphs, labels split from their values, label-value settings
 outside a list, empty list items, one-column data tables, blank paragraphs
 between a paragraph and the table after it, list items ending with a colon
-whose sub-items are not nested, a title not in title case. Advisory checks: identifiers not in inline code, short fragments,
-field lists that should be schema tables.
+whose sub-items are not nested, a title not in title case, and the
+editorial-style skill's enforced checks (editorial issues). Advisory checks:
+identifiers not in inline code, short fragments, field lists that should be
+schema tables, and the editorial-style decomposition review.
+
+The editorial checks come from editorial-style/scripts/editorial_check.py,
+found beside this skill (or at the path in the EDITORIAL_CHECK environment
+variable). If it can't be found, the audit fails rather than skipping them;
+pass --no-editorial to skip them deliberately.
 """
+import importlib.util
 import json
 import re
 import sys
+from pathlib import Path
 
 LABEL = re.compile(r"^([A-Z][A-Za-z0-9 /()'\-]{0,45}?):")
 COMMAND = re.compile(r"(^|\s)(az|dotnet|func|git|curl|pip|npm|kubectl|terraform|ssh|sudo|"
@@ -90,10 +99,70 @@ HARD_KEYS = ["bold past label", "commands outside code blocks (inline)",
              "sentences split across a list", "arrow chains in paragraphs",
              "labels split from their values", "settings outside a list",
              "empty list items", "one-column tables", "blank paragraphs before a table",
-             "sub-lists not nested", "title not in title case"]
+             "sub-lists not nested", "title not in title case", "editorial issues"]
 ADV_KEYS = ["identifiers not in inline code", "short fragments after a lead-in",
-            "field lists that should be schema tables"]
+            "field lists that should be schema tables", "decomposition review notes"]
 FIELDS = re.compile(r"\b(fields?|columns?|schema|properties)\b", re.I)
+
+
+def load_editorial():
+    """Import editorial_check.py from the editorial-style skill, or return None."""
+    import os
+    cands = [Path(os.environ["EDITORIAL_CHECK"])] if os.environ.get("EDITORIAL_CHECK") else []
+    for parent in Path(__file__).resolve().parents:
+        cands.append(parent / "editorial-style" / "scripts" / "editorial_check.py")
+    for c in cands:
+        if c.is_file():
+            spec = importlib.util.spec_from_file_location("editorial_check", c)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            return mod
+    return None
+
+
+def editorial(body, hard, adv, ex, hit):
+    """Run the editorial-style checks on the Doc's text (decision register section 2)."""
+    ec = load_editorial()
+    if ec is None:
+        hit(hard, "editorial issues", "editorial_check.py not found: install the editorial-style "
+            "skill beside this one, set EDITORIAL_CHECK, or pass --no-editorial")
+        return
+    headings, prose, non_code, spans, links, paras = [], [], [], [], [], []
+
+    def para(p, in_cell):
+        rs = runs(p)
+        t = text(p).strip()
+        if not t:
+            return
+        st = p.get("paragraphStyle", {}).get("namedStyleType", "")
+        if st == "TITLE":
+            return                      # the title-case check above covers it
+        if st.startswith("HEADING") or st == "SUBTITLE":
+            headings.append(t)
+            return
+        prose.append(t)
+        non_code.append("".join(r["content"] for r in rs if not is_mono(r.get("textStyle", {}))))
+        links.extend(r["content"].strip() for r in rs if r.get("textStyle", {}).get("link"))
+        if not in_cell or len(t.split()) > 12:
+            paras.append(t)
+            spans.append([r["content"] for r in rs if is_mono(r.get("textStyle", {}))
+                          and r["content"].strip()])
+
+    for el in body:
+        if "paragraph" in el:
+            para(el["paragraph"], False)
+        elif "table" in el and kind_of_table(el["table"]) != "code":
+            for row in el["table"]["tableRows"]:
+                for cell in row["tableCells"]:
+                    for c in cell["content"]:
+                        if "paragraph" in c:
+                            para(c["paragraph"], True)
+    for issue in ec.check(None, headings, prose, non_code, links):
+        if "\u2014" in issue:
+            continue                    # counted by the em-dash check
+        hit(hard, "editorial issues", issue.replace("editorial: ", ""))
+    for note in ec.review_all(paras, spans):
+        hit(adv, "decomposition review notes", note.replace("review: ", ""))
 
 
 def report(tables, hard, adv, ex, skipped=()):
@@ -199,7 +268,7 @@ def main_markdown(path):
                                                   "consecutive empty paragraphs"))
 
 
-def main(path, tab_id=None):
+def main(path, tab_id=None, run_editorial=True):
     body, named = load(path, tab_id)
     arial = named.get("NORMAL_TEXT", {}).get("textStyle", {}).get("weightedFontFamily", {}) \
         .get("fontFamily", "Arial") == "Arial"
@@ -214,8 +283,9 @@ def main(path, tab_id=None):
     def hit(bucket, key, sample):
         bucket[key] = bucket.get(key, 0) + 1
         ex.setdefault(key, [])
-        if len(ex[key]) < 5:
-            ex[key].append(sample[:90])
+        wide = key.startswith(("editorial", "decomposition"))
+        if len(ex[key]) < (12 if wide else 5):
+            ex[key].append(sample[:170 if wide else 90])
 
     tables = {}
     empty_run = 0
@@ -336,6 +406,8 @@ def main(path, tab_id=None):
                 and i > 0 and seq[i - 1][0] == "p" and text(seq[i - 1][1]).rstrip().endswith(":"):
             hit(adv, "short fragments after a lead-in", t)
 
+    if run_editorial:
+        editorial(body, hard, adv, ex, hit)
     return report(tables, hard, adv, ex)
 
 
@@ -344,4 +416,4 @@ if __name__ == "__main__":
     tab = args[args.index("--tab") + 1] if "--tab" in args else None
     if args[0].lower().endswith((".md", ".markdown")) or not open(args[0], encoding="utf-8").read(1) in "{[":
         sys.exit(main_markdown(args[0]))
-    sys.exit(main(args[0], tab))
+    sys.exit(main(args[0], tab, "--no-editorial" not in args))

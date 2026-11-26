@@ -80,13 +80,15 @@ Companion Impact on Change Log; all References columns.
 
 ## 4. Overview tab
 
-Six columns, 120 px each. Rows are fixed; the layout does not grow.
+Six columns, 120 px each. Rows are fixed; the layout does not grow. The tab's
+base format clips text at the cell edge, so every text block wider than one
+column is merged across the columns it needs.
 
 | Rows | Block | Format |
 | --- | --- | --- |
-| 1 | Title (project name) | Poppins 20 pt bold, Ink, 40 px row |
-| 2 | Subtitle (`Task tracker`) | Source Sans 3 12 pt, Meta |
-| 3 | Metadata line | 10 pt Meta: `Plan: <plan name> v<X.Y>  |  Tracker v<X.Y>  |  As of <Mon D, YYYY>`; Teal medium bottom border across A:F |
+| 1 | Title (project name) | Merged A:F; Poppins 20 pt bold, Navy, 40 px row |
+| 2 | Subtitle (`Task tracker`) | Merged A:F; Source Sans 3 12 pt, Meta |
+| 3 | Metadata line | Merged A:F; 10 pt Meta: `Plan: <plan name> v<X.Y>  |  Tracker v<X.Y>  |  As of <Mon D, YYYY>`; Teal medium bottom border across A:F |
 | 4 | Spacer | 10 px |
 | 5 to 6 | Summary tiles | Band fill; labels 9 pt Meta in row 5; numbers Poppins 18 pt bold in row 6; thick white vertical borders between tiles |
 | 8 | Section heading `Status` | Poppins 12 pt bold, Teal |
@@ -136,6 +138,8 @@ hand and is never derived from task completion.
 ## 6. Verification checklist
 
 - [ ] Tabs, order, and tab colors match section 2; gridlines are hidden.
+- [ ] The Overview title, subtitle, and metadata line are each merged across A:F
+      and show in full.
 - [ ] Every data tab has a frozen Ink header, banding, row borders, and a filter.
 - [ ] Status, Priority, State, and Gate status cells show a dropdown, and each value
       shows its palette color.

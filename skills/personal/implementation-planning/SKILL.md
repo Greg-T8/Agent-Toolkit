@@ -3,7 +3,7 @@ name: implementation-planning
 description: Create or update a project implementation plan and linked task tracker. Default to an editable Word plan and a native Google Sheets tracker with phases, dependencies, acceptance criteria, and evidence-based status.
 metadata:
   author: Greg Tate
-  version: "0.1.1"
+  version: "0.1.2"
 ---
 
 # Create an implementation plan and task tracker
@@ -60,7 +60,9 @@ reconciling either deliverable. Scale the detail to the project.
 ## Produce the Word plan
 
 Use the available Word/document authoring skill and its rendering workflow for
-the `.docx`. Follow an explicitly supplied template; otherwise use restrained,
+the `.docx`. Write the plan's text to the editorial-style skill's decision
+register, and run its `editorial_check.py` on the drafted text before
+building. Follow an explicitly supplied template; otherwise use restrained,
 readable engineering-document formatting with native headings, lists, and tables.
 Render and visually inspect every page before delivery. Report a rendering
 limitation accurately rather than claiming text extraction proves layout quality.
@@ -77,7 +79,7 @@ use its required spreadsheet authoring/import route and verify the result is
 native Google Sheets. For an explicitly selected native tracker template, use
 the Sheets template-copy workflow and verify the new destination ID. For an
 existing tracker, read metadata and bounded ranges before scoped edits.
-Format the tracker with the google-workspace-design skill's Sheets spec:
+Format the tracker with the `google-workspace-design` skill's Sheets spec:
 Overview page, banded data tabs, dropdowns, and status colors. The artifact
 contract still decides the tabs, columns, and content.
 

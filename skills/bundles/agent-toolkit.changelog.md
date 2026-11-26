@@ -1,5 +1,22 @@
 # Agent Toolkit bundle changelog
 
+## 1.3.2 - 2026-11-25
+
+- Completes the Google Sheets Overview updates: merge the title, subtitle, and metadata across A:F so they are not clipped; use Navy for the title; and align the master tracker builder and verification checklist with the spec. These updates were present in the source after the 1.3.1 archive was built.
+
+## 1.3.1 - 2026-11-25
+
+- Palette 1.2.0 adds Navy (`#1B3A6B`, 11.3:1 on white) for document and Overview titles and Heading 1, and Plum (`#8E2F5E`, 7.7:1 on white) for inline code and the code block's left rule. Ink keeps Heading 3, run-in labels, summary numbers, and header fills; Teal keeps Heading 2, the title-block rule, and In Review. Code block text stays Body.
+- Docs spec 1.6.0 and the Sheets spec match. The master Doc, the master tracker's Overview title, and both build scripts are updated.
+- Sheets spec: the Overview title, subtitle, and metadata line are merged across A:F, because the tab's base format clips text at the cell edge. The master tracker and `build_master_tracker.py` match, and the checklist checks it.
+- `editorial_check.py`: the serial-comma check no longer fires when the second item opens with a preposition or "available" (39 regression cases).
+
+## 1.3.0 - 2026-11-25
+
+- Added the `editorial-style` skill: Greg's house editorial style for all professional writing, including emails and messages. One decision register resolves the Microsoft Writing Style Guide (primary), Google developer documentation style, plain-language guidance, and Chicago, carried over from the Deliverable Accelerator's editorial conventions with the Quisitive-specific adaptations removed and the house rules added (US English, no em dashes, title-case document titles, real values over placeholders). It also adds information decomposition with worked examples, message guidance, adapted principles files for each authority, and `scripts/editorial_check.py` (ported from the Accelerator's `qeditorial.py`, with a Markdown and plain-text front end, house checks, and 35 regression cases). It takes precedence over the community writing skills in the bundle.
+- `google-workspace-design` 1.4.0 and Docs spec 1.5.0: the editorial-style skill governs a Doc's text. `audit_doc.py` loads `editorial_check.py` from the sibling skill and reports its enforced checks as the hard check "editorial issues" and its decomposition review as an advisory; it fails rather than skipping when the checker is missing, unless `--no-editorial` is passed. The read audit gains item 12, and drafts are checked as Markdown before building. The master Doc's one semicolon note is fixed.
+- `implementation-planning` 0.1.2: plan text follows the editorial-style register and is checked before building.
+
 ## 1.2.8 - 2026-11-25
 
 - Docs spec 1.4.3: the document title uses title case (minor words lowercase unless first or last; product and identifier casing kept); the subtitle and headings stay in sentence case. The master Doc's title is now "Personal Document Template".

@@ -11,7 +11,7 @@ import os
 import sys
 
 PAL = {
-    "ink": "1B2A41", "teal": "0B7A75", "teal_t": "EDF6F5", "body": "24303F",
+    "ink": "1B2A41", "navy": "1B3A6B", "teal": "0B7A75", "teal_t": "EDF6F5", "body": "24303F",
     "meta": "5F6B7A", "gray_t": "EEF1F4", "note": "1D5FBF", "note_t": "EAF2FD",
     "tip": "276E2B", "tip_t": "EAF5EA", "warn": "9A5B00", "warn_t": "FFF4DE",
     "risk": "B3261E", "risk_t": "FDECEA", "dec": "6B3FA0", "dec_t": "F2ECFA",
@@ -267,9 +267,10 @@ def overview_format():
     R.append(fmt(t, 0, None, 0, None, font=BODY, size=10, fg="body", valign="MIDDLE", wrap="CLIP"))
     R += widths(t, [120, 120, 120, 120, 120, 120])
     # title block
-    R.append(fmt(t, 0, 1, 0, 1, font=HEAD, size=20, bold=True, fg="ink"))
+    R.append(fmt(t, 0, 1, 0, 1, font=HEAD, size=20, bold=True, fg="navy"))
     R.append(fmt(t, 1, 2, 0, 1, size=12, fg="meta"))
     R.append(fmt(t, 2, 3, 0, 1, size=10, fg="meta"))
+    R.append(merge(t, 0, 3, 0, 6))  # the base format clips, so the title block spans A:F
     R.append({"updateBorders": {"range": gr(t, 2, 3, 0, 6), "bottom": border("teal", "SOLID_MEDIUM")}})
     for row, px in ((0, 40), (1, 22), (2, 24), (3, 10), (4, 22), (5, 38), (6, 14), (16, 14), (22, 14)):
         R.append(height(t, row, px))

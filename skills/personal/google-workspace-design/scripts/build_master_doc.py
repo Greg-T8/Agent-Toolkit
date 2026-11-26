@@ -16,7 +16,7 @@ import json
 import sys
 
 PAL = {
-    "ink": "1B2A41", "teal": "0B7A75", "body": "24303F", "meta": "5F6B7A",
+    "ink": "1B2A41", "navy": "1B3A6B", "plum": "8E2F5E", "teal": "0B7A75", "body": "24303F", "meta": "5F6B7A",
     "note": "1D5FBF", "note_t": "EAF2FD", "tip": "276E2B", "tip_t": "EAF5EA",
     "warn": "9A5B00", "warn_t": "FFF4DE", "risk": "B3261E", "risk_t": "FDECEA",
     "dec": "6B3FA0", "dec_t": "F2ECFA", "teal_t": "EDF6F5", "code_bg": "F1F3F5", "band": "F4F7F9",
@@ -64,9 +64,9 @@ def ts(font=None, weight=None, size=None, fg=None, bg=None, bold=None, link=None
 
 PF = "namedStyleType,spaceAbove,spaceBelow,keepWithNext,lineSpacing"
 STYLES = {  # named style, text override, paragraph style
-    "title": ("TITLE", dict(font=HEAD, weight=600, size=26, fg="ink"), dict(spaceBelow=pt(2))),
+    "title": ("TITLE", dict(font=HEAD, weight=600, size=26, fg="navy"), dict(spaceBelow=pt(2))),
     "subtitle": ("SUBTITLE", dict(size=14, fg="meta"), dict(spaceBelow=pt(6))),
-    "h1": ("HEADING_1", dict(font=HEAD, weight=600, size=18, fg="ink"),
+    "h1": ("HEADING_1", dict(font=HEAD, weight=600, size=18, fg="navy"),
            dict(spaceAbove=pt(20), spaceBelow=pt(6), keepWithNext=True)),
     "h2": ("HEADING_2", dict(font=HEAD, weight=600, size=14, fg="teal"),
            dict(spaceAbove=pt(16), spaceBelow=pt(4), keepWithNext=True)),
@@ -217,7 +217,7 @@ def code(b, lines):
 
     def cb(b, t, R, C, cells, rows):
         s, e = cells[(0, 0)]
-        b.cells(t, 0, 0, 1, 1, "code_bg", left=("teal", 3), pad=(7, 11))
+        b.cells(t, 0, 0, 1, 1, "code_bg", left=("plum", 3), pad=(7, 11))
         b.pst.append({"updateParagraphStyle": {
             "range": {"startIndex": s, "endIndex": e - 1},
             "paragraphStyle": {"lineSpacing": 100}, "fields": "lineSpacing"}})
@@ -266,20 +266,20 @@ def label_code(b, label, lines):
 def procedure_section(b):
     b.para("h1", "Procedure steps")
     b.para("body", "A procedure step is a Heading 2 followed by run-in labels in this order: "
-                   "Purpose, Action, Expected. Each label is semibold Ink and ends at its colon; "
-                   "the rest of the paragraph is regular body text. An Action label names where "
+                   "Purpose, Action, Expected. Each label is semibold Ink and ends at its colon. "
+                   "The rest of the paragraph is regular body text. An Action label names where "
                    "to run the step, and the command goes in a code block directly below it.")
     b.para("h2", "OPS-03: Verify the scheduler")
     b.para("body", [("Purpose:", LABEL), (" Confirm the scheduler is healthy before creating any jobs.", {})])
     label_code(b, "Action (Ubuntu shell):", ["hermes cron status"])
     b.para("body", [("Expected:", LABEL),
                     (" The scheduler, heartbeat, and job store report healthy. Run ", {}),
-                    ("hermes cron list", dict(font=MONO, size=10)),
+                    ("hermes cron list", dict(font=MONO, size=10, fg="plum")),
                     (" next, as its own step.", {})])
     callout(b, "Stop point", "Send the output for review. Leave OPS-03 pending until it is assessed.",
             "warn", "warn_t")
     b.para("body", [("A command named in a sentence, such as ", {}),
-                    ("hermes doctor", dict(font=MONO, size=10)),
+                    ("hermes doctor", dict(font=MONO, size=10, fg="plum")),
                     (", uses inline code. A command the reader runs always gets its own code block, "
                      "even when it is one line. Never bold a whole paragraph: bold stops at the label.", {})])
 
@@ -297,7 +297,8 @@ def main():
                    "teal rule closes the title block. There is no cover page and no table "
                    "of contents.")
     b.para("h1", "Headings and body text")
-    b.para("body", "Heading 1 marks a major section. Write headings in sentence case and "
+    b.para("body", "Heading 1 marks a major section in navy, the color of the title. "
+                   "Write headings in sentence case and "
                    "never type section numbers by hand.")
     b.para("h2", "Heading 2 for subsections")
     b.para("body", [("Heading 2 is teal Poppins. Body text is Source Sans 3 at 11 pt in a "
@@ -307,8 +308,8 @@ def main():
                     (".", {})])
     b.para("h3", "Heading 3 for topics within a subsection")
     b.para("body", [("Heading 3 is bold body type in ink. Inline code, such as ", {}),
-                    ("Get-Date", dict(font=MONO, size=10)),
-                    (", uses JetBrains Mono with no fill.", {})])
+                    ("Get-Date", dict(font=MONO, size=10, fg="plum")),
+                    (", uses plum JetBrains Mono with no fill.", {})])
     b.para("h4", "Heading 4 for short groupings")
     for t in ("Use bulleted lists for items with no required order.",
               "Keep list items parallel and short."):
@@ -340,7 +341,7 @@ def main():
         runs += [chip(w), (" ", {})]
     b.para("body", runs[:-1])
     b.para("h1", "Code")
-    b.para("body", "Code goes in a one-cell table with a light gray fill and a 3 pt teal left "
+    b.para("body", "Code goes in a one-cell table with a light gray fill and a 3 pt plum left "
                    "border, under a caption that names the shell. Keep lines under 90 "
                    "characters.")
     b.para("caption", "POWERSHELL")
@@ -354,7 +355,7 @@ def main():
 
 
 def code_run(t):
-    return (t, dict(font=MONO, size=10))
+    return (t, dict(font=MONO, size=10, fg="plum"))
 
 
 def settings_step(b):

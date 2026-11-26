@@ -1,6 +1,6 @@
 # Google Docs spec
 
-Version 1.4.3, November 25, 2026. This spec is the canonical definition of the
+Version 1.6.0, November 25, 2026. This spec is the canonical definition of the
 personal Google Docs design. Colors, status colors, and fonts come from
 [the palette](palette.md). The master Doc,
 [Personal Doc Template (master)](https://docs.google.com/document/d/1kIyDWS-94bJnd8DMOh0CyuT0KQCYLdX8f-RK_UPj5kY/edit)
@@ -11,6 +11,11 @@ below. Values in this spec win over the master Doc if the two ever differ.
 ## 1. Principles
 
 - Follow the principles in [the palette](palette.md).
+- **The editorial-style skill governs the text.** Its decision register sets
+  word choice, capitalization, punctuation, numbers, and sentence structure.
+  This spec sets how the text looks. Rules that touch both (title case,
+  sentence-case headings, no em dashes, and inline code for identifiers) are
+  the same rules, restated here for layout.
 - **Content picks the component.** Use a callout for a real note, warning, or
   decision, a table for data the reader compares, and a code block for anything
   the reader copies. Do not add components to make a page colorful.
@@ -40,10 +45,10 @@ run; do not rely on named-style definitions.
 
 | Element | Named style | Font and weight | Size | Color | Space above / below | Keep with next |
 | --- | --- | --- | --- | --- | --- | --- |
-| Title | `TITLE` | Poppins 600 | 26 pt | Ink | 0 / 2 pt | No |
+| Title | `TITLE` | Poppins 600 | 26 pt | Navy | 0 / 2 pt | No |
 | Subtitle | `SUBTITLE` | Source Sans 3 400 | 14 pt | Meta | 0 / 6 pt | No |
 | Metadata line | `NORMAL_TEXT` | Source Sans 3 400 | 10 pt | Meta | 0 / 14 pt | No |
-| Heading 1 | `HEADING_1` | Poppins 600 | 18 pt | Ink | 20 / 6 pt | Yes |
+| Heading 1 | `HEADING_1` | Poppins 600 | 18 pt | Navy | 20 / 6 pt | Yes |
 | Heading 2 | `HEADING_2` | Poppins 600 | 14 pt | Teal | 16 / 4 pt | Yes |
 | Heading 3 | `HEADING_3` | Source Sans 3 bold | 12 pt | Ink | 12 / 4 pt | Yes |
 | Heading 4 | `HEADING_4` | Source Sans 3 bold | 11 pt | Meta | 10 / 2 pt | Yes |
@@ -54,11 +59,8 @@ run; do not rely on named-style definitions.
 
 Line spacing is 115% everywhere except code (100%).
 
-The title uses title case: capitalize every word except articles (a, an, the),
-coordinating conjunctions (and, but, or, nor, for, so, yet), and
-prepositions of three letters or fewer, unless the word is first or last, and
-keep the casing of product names and identifiers. The subtitle and all headings
-use sentence case.
+The title uses title case. The subtitle and all headings use sentence case.
+The editorial-style decision register (house rules) defines both.
 
 Never type list markers as text.
 
@@ -75,7 +77,7 @@ readers or a tracker cite sections by number, and then use one scheme:
 Inline elements:
 
 - **Links:** Note color, underlined.
-- **Inline code:** JetBrains Mono 400, 10 pt, Body color, no fill. Use it for
+- **Inline code:** JetBrains Mono 400, 10 pt, Plum, no fill. Use it for
   every identifier in running text: table, field, column, key, setting, and
   environment variable names (`NewsItems`, `collected_utc`, `PartitionKey`);
   ID formats (`source_platform:stable_source_identifier`); file and folder
@@ -171,7 +173,7 @@ A caption paragraph followed by a 1 x 1 table, 468 pt wide.
 
 - **Caption:** the shell or language in capitals, such as `POWERSHELL`,
   `AZURE CLI`, `BASH`, or `JSON` (Code caption style).
-- **Cell:** background Code fill; left border Teal, 3 pt, solid; other borders
+- **Cell:** background Code fill; left border Plum, 3 pt, solid; other borders
   width 0; padding 7 pt top and bottom, 11 pt left and right.
 - **Text:** one paragraph per line, `NORMAL_TEXT`, space 0, line spacing 100%;
   JetBrains Mono 400, 9.5 pt, Body color.
@@ -342,6 +344,10 @@ Read the Doc back after building and confirm:
       text are inline code.
 - [ ] **Heading and punctuation audit:** no em dashes anywhere; headings follow
       one numbering scheme with no double numbers or trailing periods.
+- [ ] **Editorial audit:** the editorial-style enforced checks pass: sentence-case
+      headings, serial commas, no Latin abbreviations, loaded terms, or filler
+      phrases, descriptive headings and link text, and identifiers in inline
+      code. Reread each decomposition review note.
 - [ ] No empty headings, double blank paragraphs, or blank paragraphs at the end
       beyond the final one Google requires.
 - [ ] If a rendered view is available, check each page for headings stranded at
@@ -349,12 +355,17 @@ Read the Doc back after building and confirm:
       verified by read-back only.
 
 Audit the Doc after every build or revision, before reporting. Use the first
-route the session supports.
+route the session supports. Separately, run the editorial-style skill's
+`editorial_check.py` on the drafted content as Markdown before you build, and
+on any text you add in a revision. The draft is your own text, so it reaches
+Python even when the Docs response can't.
 
 - **Script audit:** when the `read_doc` result can be saved to a file that
   Python can open, run `python scripts/audit_doc.py DOC.json`. It exits 1 until
-  every hard check passes; its identifier, fragment, and schema-table counts
-  are advisory but still map to rules in this spec.
+  every hard check passes. Its hard checks include the editorial-style
+  enforced checks, which it loads from that skill's `editorial_check.py`. Its
+  identifier, fragment, schema-table, and decomposition counts are advisory
+  but still map to rules in this spec and the decision register.
 - **Read audit:** when the Docs response cannot reach Python (for example, the
   connector and the Python sandbox are separate), audit your own fresh
   `read_doc` result element by element. Never ask the user to export or upload
@@ -386,6 +397,11 @@ route the session supports.
   11. Lists and tables: no bulleted paragraph is empty; no data table has one
      column; every list item ending with a colon has its sub-items nested one
      level deeper, and a numbered list does not restart after them.
+  12. Editorial: headings in sentence case; a comma before the conjunction in
+     every list of three or more; no "e.g.", "i.e.", "etc.", "utilize",
+     "whitelist", "blacklist", or filler phrase such as "in order to"; no
+     heading that is only "Other", "Details", or "Gaps"; no link text that is
+     only "here". These are the editorial-style register's section 2 rules.
 
   Fix the structure a failing check describes; never add a list marker, a
   table, or a colon only to bring a count to 0.

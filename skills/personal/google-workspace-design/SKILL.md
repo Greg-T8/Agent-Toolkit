@@ -3,7 +3,7 @@ name: google-workspace-design
 description: Apply Greg Tate's personal visual design to native Google Docs and Google Sheets, including the shared palette, fonts, document components (title block, callouts, code blocks, tables, status chips), and the task-tracker layout (Overview, banded data tabs, status colors). Use when creating, formatting, or restyling a native Google Doc or Sheet, including files produced by the documentation and implementation-planning skills.
 metadata:
   author: Greg Tate
-  version: "1.3.2"
+  version: "1.5.0"
 ---
 
 # Design native Google Docs and Sheets
@@ -33,8 +33,10 @@ When a master file and a spec disagree, follow the spec and report the mismatch.
 ## Workflow
 
 1. **Settle the content first.** Draft with the skill that owns the content
-   (documentation skills for Docs, implementation-planning for trackers). Then map
-   each part to a component in the matching spec. Choose a component because the
+   (documentation skills for Docs, implementation-planning for trackers), and
+   write the text to the editorial-style skill's decision register. Run its
+   `editorial_check.py` on the Markdown draft and fix every enforced issue
+   before building. Then map each part to a component in the matching spec. Choose a component because the
    content calls for it, not to add color.
 2. **Translate source markup, never copy it.** Use the Docs spec's label mapping
    (section 5.7): `**Label:** text` becomes a run-in label with plain text after
@@ -53,8 +55,8 @@ When a master file and a spec disagree, follow the spec and report the mismatch.
    inherits the bold and font of the text before it.
 5. **Verify by reading the file back** against the spec's checklist, and fix
    every failure before reporting. For Docs, run the section 7 audit: the
-   script audit when the saved read can reach Python, otherwise the read audit
-   on your own fresh read. Never ask the user to export the Doc, and never
+   script audit when the saved read can reach Python (it includes the
+   editorial checks), otherwise the read audit on your own fresh read. Never ask the user to export the Doc, and never
    report compliance without an audit. If you cannot inspect a rendered view, say so
    rather than claiming visual quality from the read-back alone.
 
