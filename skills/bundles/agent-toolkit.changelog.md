@@ -1,5 +1,9 @@
 # Agent Toolkit bundle changelog
 
+## 1.3.3 - 2026-11-25
+
+- Refresh the bundled PowerShell style guide to reference `New-SkillArchive.ps1` and include the current command alias guidance.
+
 ## 1.3.2 - 2026-11-25
 
 - Completes the Google Sheets Overview updates: merge the title, subtitle, and metadata across A:F so they are not clipped; use Navy for the title; and align the master tracker builder and verification checklist with the spec. These updates were present in the source after the 1.3.1 archive was built.
