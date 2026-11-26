@@ -1,9 +1,10 @@
 # ---------------------------------------------------------------------------
-# Description   : Package selected personal and community skills for ChatGPT
+# Description   : Create ChatGPT plugin or skill archives from selected skills
 # Context       : Agent-Toolkit - configurable, portable skill distribution
 # Author        : Greg Tate & coding agent
 # Last Modified : 2026-11-25
 # Revision History:
+#   2026-11-25 - Rename packager to New-SkillArchive.ps1
 #   2026-11-25 - Default to the consolidated Agent Toolkit bundle
 #   2026-11-25 - Allow a display name without plugin icons
 #   2026-11-25 - Support a separate plugin display name
@@ -15,7 +16,7 @@
 # ---------------------------------------------------------------------------
 <#
 .SYNOPSIS
-    Package selected skills into one importable skill archive.
+    Create ChatGPT plugin or skill archives from selected skills.
 
 .DESCRIPTION
     Reads a JSON bundle definition, validates selected skill directories, and
@@ -42,10 +43,10 @@
     a standalone .skill archive with the selected Layout.
 
 .EXAMPLE
-    ./skills/Package-Skills.ps1 -WhatIf
+    ./skills/New-SkillArchive.ps1 -WhatIf
 
 .EXAMPLE
-    ./skills/Package-Skills.ps1 -ConfigPath ./skills/bundles/agent-toolkit.json
+    ./skills/New-SkillArchive.ps1 -ConfigPath ./skills/bundles/agent-toolkit.json
 
 .CONTEXT
     Agent-Toolkit - manual ChatGPT skill import from maintained source folders.

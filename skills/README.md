@@ -12,17 +12,17 @@ To preview the build without refreshing references or creating files, run:
 
 ```powershell
 # Preview the unified build without copying references or creating files.
-./skills/Build-SkillBundle.ps1 -WhatIf
+./skills/New-AgentToolkitBundle.ps1 -WhatIf
 ```
 
 To refresh the coding guidance and create the plugin archive, run:
 
 ```powershell
 # Refresh coding guidance, then package the Agent Toolkit bundle.
-./skills/Build-SkillBundle.ps1
+./skills/New-AgentToolkitBundle.ps1
 ```
 
-The build writes `_bundles/agent-toolkit.plugin.zip`. The `_bundles/` directory is excluded from Git. For another bundle or output format, use [Package-Skills.ps1](./Package-Skills.ps1) directly.
+The build writes `_bundles/agent-toolkit.plugin.zip`. The `_bundles/` directory is excluded from Git. For another bundle or output format, use [New-SkillArchive.ps1](./New-SkillArchive.ps1) directly.
 
 ## Agent Toolkit bundle
 
@@ -42,7 +42,7 @@ Upload `_bundles/agent-toolkit.plugin.zip` in ChatGPT's New Plugin dialog. After
 
 The plugin archive contains `plugin.json` at its root and one composed skill under `skills/agent-toolkit/`. The composed skill routes requests to the selected guidance embedded in `references/skills/`. Those source skills are guidance resources within one skill; they are not separate skills with individual selectors.
 
-To create the previous standalone `.skill` format, pass `-Format Skill` to [Package-Skills.ps1](./Package-Skills.ps1). That format supports `-Layout Folder`. Plugin format requires the root layout. Local archive validation does not test ChatGPT's importer, so verify acceptance in your account.
+To create the previous standalone `.skill` format, pass `-Format Skill` to [New-SkillArchive.ps1](./New-SkillArchive.ps1). That format supports `-Layout Folder`. Plugin format requires the root layout. Local archive validation does not test ChatGPT's importer, so verify acceptance in your account.
 
 The package preserves each selected skill's relative file structure and bytes. It does not resolve references outside selected directories, provide tool integrations, install other skills, or adapt machine-specific paths. Packaging never executes source scripts. Review platform assumptions and select any additional guidance the destination needs.
 
@@ -50,7 +50,7 @@ See [OpenAI's skills guidance](https://learn.chatgpt.com/docs/build-skills) for 
 
 ## Refresh coding guidance
 
-The unified build first refreshes the general, PowerShell, and Shell instruction copies in `personal/coding-guidelines/references`, then packages the skills selected in [agent-toolkit.json](./bundles/agent-toolkit.json). To refresh those embedded references without building an archive, run [Sync-CodingGuidelines.ps1](./Sync-CodingGuidelines.ps1). The lower-level [Package-Skills.ps1](./Package-Skills.ps1) uses the configured selections but does not refresh the instruction copies.
+The unified build first refreshes the general, PowerShell, and Shell instruction copies in `personal/coding-guidelines/references`, then packages the skills selected in [agent-toolkit.json](./bundles/agent-toolkit.json). To refresh those embedded references without building an archive, run [Sync-CodingGuidelines.ps1](./Sync-CodingGuidelines.ps1). The lower-level [New-SkillArchive.ps1](./New-SkillArchive.ps1) uses the configured selections but does not refresh the instruction copies.
 
 The build reports the output path, status, selected skill count, archive entry count, and file size. Rebuilding replaces the archive with the same bundle name and leaves other bundles in the output directory. Removing a skill from a configuration removes it from that bundle on the next successful build.
 
@@ -97,10 +97,10 @@ To build a different selection or choose another output directory and layout, ru
 
 ```powershell
 # Package a plugin using a custom bundle configuration.
-./skills/Package-Skills.ps1 -ConfigPath ./skills/bundles/my-bundle.json
+./skills/New-SkillArchive.ps1 -ConfigPath ./skills/bundles/my-bundle.json
 
 # Create a standalone skill archive in a folder layout.
-./skills/Package-Skills.ps1 -Format Skill -OutputDirectory ./release -Layout Folder
+./skills/New-SkillArchive.ps1 -Format Skill -OutputDirectory ./release -Layout Folder
 ```
 
 ## Validation and provenance
@@ -113,4 +113,4 @@ The packager copies ancestor `LICENSE`, `LICENCE`, `COPYING`, and `NOTICE` files
 
 The packager builds the archive in a unique temporary file, reopens it, and checks its entries against the validated plan before replacing the previous output. It removes the temporary file on success or failure. The `-WhatIf` option performs a read-only preflight and reports the target without creating an output directory. Custom output directories must remain outside `personal/` and `community/`.
 
-Use [Build-SkillBundle.ps1](./Build-SkillBundle.ps1) with `-WhatIf` to preview the unified build. When reviewing a release, verify the plugin manifest, embedded bundle version, selected skill inventory, file hashes, and changelog. Local archive checks do not verify acceptance by ChatGPT's importer.
+Use [New-AgentToolkitBundle.ps1](./New-AgentToolkitBundle.ps1) with `-WhatIf` to preview the unified build. When reviewing a release, verify the plugin manifest, embedded bundle version, selected skill inventory, file hashes, and changelog. Local archive checks do not verify acceptance by ChatGPT's importer.

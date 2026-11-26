@@ -108,7 +108,7 @@ finally {
 
   ```powershell
   $SyncScriptPath    = Join-Path $PSScriptRoot 'Sync-CodingGuidelines.ps1'
-  $PackageScriptPath = Join-Path $PSScriptRoot 'Package-Skills.ps1'
+  $SkillArchiveScriptPath = Join-Path $PSScriptRoot 'New-SkillArchive.ps1'
   $BundleConfigPath  = Join-Path $PSScriptRoot 'bundles\coding-guidelines.json'
   ```
 

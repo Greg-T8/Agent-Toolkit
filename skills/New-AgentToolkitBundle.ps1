@@ -33,9 +33,9 @@ param(
 )
 
 # Resolve the consolidated bundle inputs relative to this script.
-$SyncScriptPath    = Join-Path $PSScriptRoot 'Sync-CodingGuidelines.ps1'
-$PackageScriptPath = Join-Path $PSScriptRoot 'Package-Skills.ps1'
-$BundleConfigPath  = Join-Path $PSScriptRoot 'bundles\agent-toolkit.json'
+$SyncScriptPath         = Join-Path $PSScriptRoot 'Sync-CodingGuidelines.ps1'
+$SkillArchiveScriptPath = Join-Path $PSScriptRoot 'New-SkillArchive.ps1'
+$BundleConfigPath       = Join-Path $PSScriptRoot 'bundles\agent-toolkit.json'
 
 # Keep the build sequence to synchronization followed by shared packaging.
 $Main = {
@@ -54,7 +54,7 @@ $Helpers = {
 
     function New-SkillBundle {
         # Package every selected skill using the consolidated manifest.
-        & $PackageScriptPath -ConfigPath $BundleConfigPath -OutputDirectory $OutputDirectory
+        & $SkillArchiveScriptPath -ConfigPath $BundleConfigPath -OutputDirectory $OutputDirectory
     }
 }
 
