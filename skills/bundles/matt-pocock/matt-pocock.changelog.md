@@ -1,5 +1,14 @@
 # Matt Pocock Skills bundle changelog
 
+## 0.3.3 - 2026-11-27
+
+- Ground `to-spec` in Google Workspace documents and trackers alongside repositories, and separate source discovery from issue publication.
+- Preserve test-seam confirmation and report missing sources, code evidence, tracker configuration, and unpublished specifications.
+
+## 0.3.2 - 2026-11-27
+
+- Apply the Agent Toolkit editorial and Google Docs design guidance to adapter workflows, with glossary structure, formatting, source, and verification checks.
+
 ## 0.3.1 - 2026-11-27
 
 - Renamed `grill-interview-adapter` to `matt-pocock-adapter` to accommodate additional upstream workflows.

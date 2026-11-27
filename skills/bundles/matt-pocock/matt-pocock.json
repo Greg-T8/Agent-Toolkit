@@ -1,7 +1,7 @@
 {
   "name": "matt-pocock",
   "displayName": "Matt Pocock Skills (Upstream)",
-  "version": "0.3.1",
+  "version": "0.3.3",
   "description": "Stress-test plans and designs through Matt Pocock's interviews and synthesize conversations into specifications, with optional domain modeling, glossaries, and architecture decision records.",
   "routingSkill": "matt-pocock-adapter",
   "skills": [
