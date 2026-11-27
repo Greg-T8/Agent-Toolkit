@@ -26,7 +26,7 @@ The build writes `_bundles/agent-toolkit.plugin.zip`. The `_bundles/` directory 
 
 ## Agent Toolkit bundle
 
-The **Agent Toolkit** bundle combines technical documentation, editorial style, implementation planning, Google Workspace design, and coding guidance. Its selected skills and version are defined in [agent-toolkit.json](./bundles/agent-toolkit.json); its release history is in [agent-toolkit.changelog.md](./bundles/agent-toolkit.changelog.md). The shared document-and-checkmark icon identifies the combined workflow.
+The **Agent Toolkit** bundle combines technical documentation, editorial style, implementation planning, Google Workspace design, and coding guidance. Its selected skills and version are defined in [agent-toolkit.json](./bundles/agent-toolkit/agent-toolkit.json); its release history is in [agent-toolkit.changelog.md](./bundles/agent-toolkit/agent-toolkit.changelog.md). The shared document-and-checkmark icon identifies the combined workflow.
 
 The implementation-planning skill creates paired Word plans and native Google Sheets trackers, with stable identifiers, phase gates, and evidence-based progress. Its [source patterns](./personal/productivity/implementation-planning/references/source-patterns.md) retain links to examples without copying project documents. Word authoring and connected Google Sheets capabilities must also be available in the destination environment.
 
@@ -50,7 +50,7 @@ See [OpenAI's skills guidance](https://learn.chatgpt.com/docs/build-skills) for 
 
 ## Refresh coding guidance
 
-The unified build first refreshes the general, PowerShell, and Shell instruction copies in `personal/code/coding-guidelines/references`, then packages the skills selected in [agent-toolkit.json](./bundles/agent-toolkit.json). To refresh those embedded references without building an archive, run [Sync-CodingGuidelines.ps1](./Sync-CodingGuidelines.ps1). The lower-level [New-SkillArchive.ps1](./New-SkillArchive.ps1) uses the configured selections but does not refresh the instruction copies.
+The unified build first refreshes the general, PowerShell, and Shell instruction copies in `personal/code/coding-guidelines/references`, then packages the skills selected in [agent-toolkit.json](./bundles/agent-toolkit/agent-toolkit.json). To refresh those embedded references without building an archive, run [Sync-CodingGuidelines.ps1](./Sync-CodingGuidelines.ps1). The lower-level [New-SkillArchive.ps1](./New-SkillArchive.ps1) uses the configured selections but does not refresh the instruction copies.
 
 The build compares the current skill selection with the existing local archive before replacing it. If skills were added, removed, or moved, it requires a newer version and a changelog section for that version naming each added and removed skill. Update the version and changelog before rebuilding; review the notes for accuracy because the name check does not interpret their meaning. If the previous archive is missing or unreadable, the build warns that no comparison is available. The archive reflects the last local build, which may differ from an uploaded version.
 
@@ -58,7 +58,7 @@ The build reports the output path, status, selected skill count, archive entry c
 
 ## Choose skills
 
-Edit [agent-toolkit.json](./bundles/agent-toolkit.json) to maintain the bundle selection. A configuration requires `name`, `version`, `description`, and `skills`; unknown keys are rejected. The optional `routingSkill` names a selected skill that the generated entry point instructs the host to read first. The optional `icon` names a PNG under `skills/bundles/`, relative to `skills/`. Plugin builds use it as the plugin logo and composer icon. Standalone skill archives do not use it. The optional `composerIcon` follows the same path rules and overrides the composer icon without changing the plugin logo.
+Edit [agent-toolkit.json](./bundles/agent-toolkit/agent-toolkit.json) to maintain the bundle selection. A configuration requires `name`, `version`, `description`, and `skills`; unknown keys are rejected. The optional `routingSkill` names a selected skill that the generated entry point instructs the host to read first. The optional `icon` names a PNG in a bundle directory under `skills/bundles/`, relative to `skills/`. Plugin builds use it as the plugin logo and composer icon. Standalone skill archives do not use it. The optional `composerIcon` follows the same path rules and overrides the composer icon without changing the plugin logo.
 
 For example, this configuration selects two personal skills:
 
@@ -110,7 +110,7 @@ To build a different selection or choose another output directory and layout, ru
 
 ```powershell
 # Package a plugin using a custom bundle configuration.
-./skills/New-SkillArchive.ps1 -ConfigPath ./skills/bundles/my-bundle.json
+./skills/New-SkillArchive.ps1 -ConfigPath ./skills/bundles/my-bundle/my-bundle.json
 
 # Create a standalone skill archive in a folder layout.
 ./skills/New-SkillArchive.ps1 -Format Skill -OutputDirectory ./release -Layout Folder
@@ -118,7 +118,7 @@ To build a different selection or choose another output directory and layout, ru
 
 ## Release the Matt Pocock bundle
 
-The [Matt Pocock configuration](./bundles/matt-pocock.json) packages a small selection from the [upstream repository](https://github.com/mattpocock/skills). Its [changelog](./bundles/matt-pocock.changelog.md) records the bundle's releases. This is Greg's independent packaging, not an upstream publication. It does not change the Agent Toolkit bundle.
+The [Matt Pocock configuration](./bundles/matt-pocock/matt-pocock.json) packages a small selection from the [upstream repository](https://github.com/mattpocock/skills). Its [changelog](./bundles/matt-pocock/matt-pocock.changelog.md) records the bundle's releases. This is Greg's independent packaging, not an upstream publication. It does not change the Agent Toolkit bundle.
 
 The archive contains one composed skill, not independently selectable upstream skills. Its entry point directs interview requests through the personal [grill-interview-adapter](./personal/productivity/grill-interview-adapter/SKILL.md). The adapter loads `grilling` directly for `grill-me`, and both `grilling` and `domain-modeling` for `grill-with-docs`; the upstream files and formats remain unchanged. The documentation workflow needs access to the relevant project and files. Interactive questionnaires depend on host capabilities. Test both routing and behavior in the destination before expanding the selection.
 
@@ -131,10 +131,10 @@ For each release:
 
    ```powershell
    # Validate the selection without creating an archive.
-   ./skills/New-SkillArchive.ps1 -ConfigPath ./skills/bundles/matt-pocock.json -WhatIf
+   ./skills/New-SkillArchive.ps1 -ConfigPath ./skills/bundles/matt-pocock/matt-pocock.json -WhatIf
 
    # Package the reviewed Matt Pocock selection.
-   ./skills/New-SkillArchive.ps1 -ConfigPath ./skills/bundles/matt-pocock.json
+   ./skills/New-SkillArchive.ps1 -ConfigPath ./skills/bundles/matt-pocock/matt-pocock.json
    ```
 
 5. Reopen `_bundles/matt-pocock.plugin.zip` and verify the root plugin manifest, bundle manifest, version, source commit and dirty status, selected files and hashes, license notices, and generated guidance and changelog. The shared packager's archive check is a structural check, not a ChatGPT import test.

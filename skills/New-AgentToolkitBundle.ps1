@@ -4,6 +4,7 @@
 # Author        : Greg Tate & coding agent
 # Last Modified : 2026-11-27
 # Revision History:
+#   2026-11-27 - Locate the configuration in its bundle directory
 #   2026-11-27 - Check selection changes against version and changelog
 #   2026-11-25 - Consolidate all skills into the Agent Toolkit build
 #   2026-11-25 - Initial version
@@ -37,7 +38,7 @@ param(
 # Resolve the consolidated bundle inputs relative to this script.
 $SyncScriptPath         = Join-Path $PSScriptRoot 'Sync-CodingGuidelines.ps1'
 $SkillArchiveScriptPath = Join-Path $PSScriptRoot 'New-SkillArchive.ps1'
-$BundleConfigPath       = Join-Path $PSScriptRoot 'bundles\agent-toolkit.json'
+$BundleConfigPath       = Join-Path $PSScriptRoot 'bundles\agent-toolkit\agent-toolkit.json'
 
 # Keep the build sequence to synchronization followed by shared packaging.
 $Main = {

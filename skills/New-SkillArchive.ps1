@@ -4,6 +4,7 @@
 # Author        : Greg Tate & coding agent
 # Last Modified : 2026-11-27
 # Revision History:
+#   2026-11-27 - Locate bundle definitions and icons in bundle directories
 #   2026-11-27 - Support an optional bundle routing skill
 #   2026-11-25 - Rename packager to New-SkillArchive.ps1
 #   2026-11-25 - Default to the consolidated Agent Toolkit bundle
@@ -47,7 +48,7 @@
     ./skills/New-SkillArchive.ps1 -WhatIf
 
 .EXAMPLE
-    ./skills/New-SkillArchive.ps1 -ConfigPath ./skills/bundles/agent-toolkit.json
+    ./skills/New-SkillArchive.ps1 -ConfigPath ./skills/bundles/agent-toolkit/agent-toolkit.json
 
 .CONTEXT
     Agent-Toolkit - manual ChatGPT skill import from maintained source folders.
@@ -59,7 +60,7 @@
 
 [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
 param(
-    [string]$ConfigPath = (Join-Path $PSScriptRoot 'bundles/agent-toolkit.json'),
+    [string]$ConfigPath = (Join-Path $PSScriptRoot 'bundles/agent-toolkit/agent-toolkit.json'),
     [string]$OutputDirectory = (Join-Path $PSScriptRoot '_bundles'),
     [ValidateSet('Plugin', 'Skill')]
     [string]$Format = 'Plugin',
@@ -134,11 +135,12 @@ $Helpers = {
         }
         foreach ($IconKey in @('icon', 'composerIcon')) {
             if (-not $Definition.Contains($IconKey)) { continue }
-            if ($Definition[$IconKey] -isnot [string] -or $Definition[$IconKey] -notmatch '^bundles[/\\][a-zA-Z0-9][a-zA-Z0-9._-]*\.png$') {
-                throw "Bundle $IconKey must be a PNG file directly under bundles/."
+            if ($Definition[$IconKey] -isnot [string] -or $Definition[$IconKey] -notmatch '^bundles[/\\][a-zA-Z0-9][a-zA-Z0-9_-]*[/\\][a-zA-Z0-9][a-zA-Z0-9._-]*\.png$') {
+                throw "Bundle $IconKey must be a PNG file in a bundle directory under bundles/."
             }
             $Icon = Get-Item -LiteralPath (Join-Path $PSScriptRoot $Definition[$IconKey])
-            if ($Icon.PSIsContainer -or ($Icon.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
+            if ($Icon.PSIsContainer -or ($Icon.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -or
+                ($Icon.Directory.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
                 throw "Bundle $IconKey must be a physical PNG file."
             }
         }
