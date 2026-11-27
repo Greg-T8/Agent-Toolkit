@@ -52,6 +52,8 @@ See [OpenAI's skills guidance](https://learn.chatgpt.com/docs/build-skills) for 
 
 The unified build first refreshes the general, PowerShell, and Shell instruction copies in `personal/code/coding-guidelines/references`, then packages the skills selected in [agent-toolkit.json](./bundles/agent-toolkit.json). To refresh those embedded references without building an archive, run [Sync-CodingGuidelines.ps1](./Sync-CodingGuidelines.ps1). The lower-level [New-SkillArchive.ps1](./New-SkillArchive.ps1) uses the configured selections but does not refresh the instruction copies.
 
+The build compares the current skill selection with the existing local archive before replacing it. If skills were added, removed, or moved, it requires a newer version and a changelog section for that version naming each added and removed skill. Update the version and changelog before rebuilding; review the notes for accuracy because the name check does not interpret their meaning. If the previous archive is missing or unreadable, the build warns that no comparison is available. The archive reflects the last local build, which may differ from an uploaded version.
+
 The build reports the output path, status, selected skill count, archive entry count, and file size. Rebuilding replaces the archive with the same bundle name and leaves other bundles in the output directory. Removing a skill from a configuration removes it from that bundle on the next successful build.
 
 ## Choose skills

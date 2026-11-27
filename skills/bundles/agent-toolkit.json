@@ -1,7 +1,7 @@
 {
   "name": "agent-toolkit",
   "displayName": "Agent Toolkit",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "icon": "bundles/agent-toolkit.png",
   "description": "Write, structure, review, and improve technical documents and clear professional prose, including emails and messages, in Greg Tate's house editorial style (Microsoft Writing Style Guide first, with Google developer documentation, plain-language, and Chicago principles); stress-test plans and designs through focused interviews; format native Google Docs and Google Sheets task trackers with Greg Tate's personal design; create or update Word implementation plans and linked Google Sheets task trackers; resolve document links; and apply Greg Tate's general, PowerShell, and Shell coding guidance before editing scripts.",
   "skills": [

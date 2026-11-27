@@ -1,5 +1,10 @@
 # Agent Toolkit bundle changelog
 
+## 1.3.4 - 2026-11-27
+
+- Removed the `markdown-link-resolver`, `grill-me`, and `grilling` skills from the bundle selection.
+- Updated the paths for the retained `coding-guidelines`, `implementation-planning`, `editorial-style`, and `google-workspace-design` skills to reflect their themed folders. No skills were added in this selection change.
+
 ## 1.3.3 - 2026-11-25
 
 - Refresh the bundled PowerShell style guide to reference `New-SkillArchive.ps1` and include the current command alias guidance.
