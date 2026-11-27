@@ -2,8 +2,9 @@
 # Description   : Create ChatGPT plugin or skill archives from selected skills
 # Context       : Agent-Toolkit - configurable, portable skill distribution
 # Author        : Greg Tate & coding agent
-# Last Modified : 2026-11-25
+# Last Modified : 2026-11-27
 # Revision History:
+#   2026-11-27 - Support an optional bundle routing skill
 #   2026-11-25 - Rename packager to New-SkillArchive.ps1
 #   2026-11-25 - Default to the consolidated Agent Toolkit bundle
 #   2026-11-25 - Allow a display name without plugin icons
@@ -80,6 +81,9 @@ $Main = {
     # Build the entire file plan before permitting any output changes.
     $Definition = Get-BundleDefinition -Path $ConfigPath
     $Plan = New-BundlePlan -Definition $Definition
+    if ($Definition.Contains('routingSkill') -and $Definition.routingSkill -cnotin @($Plan.Name)) {
+        throw "Bundle routingSkill '$($Definition.routingSkill)' must name a selected skill."
+    }
     New-SkillArchive -Definition $Definition -Plan $Plan
 }
 #endregion
@@ -98,7 +102,7 @@ $Helpers = {
             throw 'Bundle configuration must be a JSON object.'
         }
         foreach ($Key in $Definition.Keys) {
-            if ($Key -notin @('name', 'displayName', 'description', 'version', 'skills', 'icon', 'composerIcon')) {
+            if ($Key -notin @('name', 'displayName', 'description', 'version', 'skills', 'icon', 'composerIcon', 'routingSkill')) {
                 throw "Unknown bundle configuration field '$Key'."
             }
         }
@@ -122,6 +126,11 @@ $Helpers = {
         }
         if ($Definition.skills -isnot [array] -or $Definition.skills.Count -eq 0) {
             throw 'Bundle skills must be a nonempty JSON array of directory paths.'
+        }
+        if ($Definition.Contains('routingSkill') -and
+            ($Definition.routingSkill -isnot [string] -or $Definition.routingSkill -cnotmatch '^[a-z0-9]+(-[a-z0-9]+)*$' -or
+                $Definition.routingSkill.Length -gt 64)) {
+            throw 'Bundle routingSkill must be a lowercase skill name of at most 64 characters.'
         }
         foreach ($IconKey in @('icon', 'composerIcon')) {
             if (-not $Definition.Contains($IconKey)) { continue }
@@ -327,6 +336,9 @@ $Helpers = {
             'SKILL.md before applying it; load its supporting files only as needed.', '',
             '## Included guidance', ''
         )
+        if ($Definition.Contains('routingSkill')) {
+            $Lines += "For requests covered by this bundle, first read and follow the [$($Definition.routingSkill) routing guidance](references/skills/$($Definition.routingSkill)/SKILL.md).", ''
+        }
         foreach ($Skill in $Plan) {
             $Lines += "- [$($Skill.Name)](references/skills/$($Skill.Name)/SKILL.md): $($Skill.Description)"
         }

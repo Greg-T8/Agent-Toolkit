@@ -1,9 +1,11 @@
 {
   "name": "matt-pocock",
   "displayName": "Matt Pocock Skills (Upstream)",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Stress-test plans and designs through Matt Pocock's interviews, with optional domain modeling, glossaries, and architecture decision records.",
+  "routingSkill": "grill-interview-adapter",
   "skills": [
+    "personal/productivity/grill-interview-adapter",
     "community/mattpocock/skills/productivity/grill-me",
     "community/mattpocock/skills/engineering/grill-with-docs",
     "community/mattpocock/skills/productivity/grilling",

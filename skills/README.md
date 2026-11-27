@@ -58,7 +58,7 @@ The build reports the output path, status, selected skill count, archive entry c
 
 ## Choose skills
 
-Edit [agent-toolkit.json](./bundles/agent-toolkit.json) to maintain the bundle selection. A configuration requires `name`, `version`, `description`, and `skills`; unknown keys are rejected. The optional `icon` names a PNG under `skills/bundles/`, relative to `skills/`. Plugin builds use it as the plugin logo and composer icon. Standalone skill archives do not use it. The optional `composerIcon` follows the same path rules and overrides the composer icon without changing the plugin logo.
+Edit [agent-toolkit.json](./bundles/agent-toolkit.json) to maintain the bundle selection. A configuration requires `name`, `version`, `description`, and `skills`; unknown keys are rejected. The optional `routingSkill` names a selected skill that the generated entry point instructs the host to read first. The optional `icon` names a PNG under `skills/bundles/`, relative to `skills/`. Plugin builds use it as the plugin logo and composer icon. Standalone skill archives do not use it. The optional `composerIcon` follows the same path rules and overrides the composer icon without changing the plugin logo.
 
 For example, this configuration selects two personal skills:
 
@@ -84,7 +84,7 @@ Personal skills are grouped under their matching Skills Atlas theme folder:
 | `design` | `mermaid-styling` |
 | `devops` | `bicep-azure`, `package-skill-bundles`, `terraform-ad-lab`, `terraform-azure` |
 | `documents` | `google-workspace-design` |
-| `productivity` | `implementation-planning` |
+| `productivity` | `grill-interview-adapter`, `implementation-planning` |
 | `writing` | `editorial-style`, `markdown-link-resolver` |
 
 Use lowercase letters, digits, and single hyphens for the bundle name; the name can contain up to 64 characters. Set the version to `major.minor.patch`. Write the description to describe the selected skills and trigger their use.
@@ -120,7 +120,7 @@ To build a different selection or choose another output directory and layout, ru
 
 The [Matt Pocock configuration](./bundles/matt-pocock.json) packages a small selection from the [upstream repository](https://github.com/mattpocock/skills). Its [changelog](./bundles/matt-pocock.changelog.md) records the bundle's releases. This is Greg's independent packaging, not an upstream publication. It does not change the Agent Toolkit bundle.
 
-The archive contains one composed skill, not independently selectable upstream skills. `grill-me` asks the host to invoke `grilling`; `grill-with-docs` asks it to invoke both `grilling` and `domain-modeling`. All four are included, along with the domain-modeling formats, but their presence does not prove that these invocations work in ChatGPT. The documentation workflow also needs access to the relevant project and files. Test these behaviors in the destination before expanding the selection.
+The archive contains one composed skill, not independently selectable upstream skills. Its entry point directs interview requests through the personal [grill-interview-adapter](./personal/productivity/grill-interview-adapter/SKILL.md). The adapter loads `grilling` directly for `grill-me`, and both `grilling` and `domain-modeling` for `grill-with-docs`; the upstream files and formats remain unchanged. The documentation workflow needs access to the relevant project and files. Interactive questionnaires depend on host capabilities. Test both routing and behavior in the destination before expanding the selection.
 
 For each release:
 
@@ -138,7 +138,7 @@ For each release:
    ```
 
 5. Reopen `_bundles/matt-pocock.plugin.zip` and verify the root plugin manifest, bundle manifest, version, source commit and dirty status, selected files and hashes, license notices, and generated guidance and changelog. The shared packager's archive check is a structural check, not a ChatGPT import test.
-6. When ready to test in ChatGPT, import the archive and check discovery, `grill-me` invoking `grilling`, and `grill-with-docs` invoking both dependencies and using their glossary and ADR formats. Record which behaviors worked and any unavailable tools. Only add other engineering workflows after reviewing their setup, repository, issue-tracker, and tool requirements.
+6. When ready to test in ChatGPT, import the archive and check discovery, adapter routing, whole-round interaction or the Markdown fallback, and both workflows loading their dependencies. Check `grill-with-docs` against an accessible project and its glossary and ADR formats. Record which behaviors worked and any unavailable tools. Only add other engineering workflows after reviewing their setup, repository, issue-tracker, and tool requirements.
 
 The selection and version guard in `New-AgentToolkitBundle.ps1` applies only to the Agent Toolkit build. Custom bundles use the manual comparison and release checks above; `New-SkillArchive.ps1` does not enforce a version increase when content changes.
 
