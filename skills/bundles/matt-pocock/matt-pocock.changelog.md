@@ -1,5 +1,10 @@
 # Matt Pocock Skills bundle changelog
 
+## 0.3.4 - 2026-11-27
+
+- Default `to-spec` delivery to a native Google Doc when the project's established document format supports it, while honoring explicit publication conditions.
+- Separate Google Doc delivery from issue publication and report each outcome independently.
+
 ## 0.3.3 - 2026-11-27
 
 - Ground `to-spec` in Google Workspace documents and trackers alongside repositories, and separate source discovery from issue publication.
