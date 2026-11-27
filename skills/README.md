@@ -84,7 +84,7 @@ Personal skills are grouped under their matching Skills Atlas theme folder:
 | `design` | `mermaid-styling` |
 | `devops` | `bicep-azure`, `package-skill-bundles`, `terraform-ad-lab`, `terraform-azure` |
 | `documents` | `google-workspace-design` |
-| `productivity` | `grill-interview-adapter`, `implementation-planning` |
+| `productivity` | `matt-pocock-adapter`, `implementation-planning` |
 | `writing` | `editorial-style`, `markdown-link-resolver` |
 
 Use lowercase letters, digits, and single hyphens for the bundle name; the name can contain up to 64 characters. Set the version to `major.minor.patch`. Write the description to describe the selected skills and trigger their use.
@@ -120,7 +120,7 @@ To build a different selection or choose another output directory and layout, ru
 
 The [Matt Pocock configuration](./bundles/matt-pocock/matt-pocock.json) packages a small selection from the [upstream repository](https://github.com/mattpocock/skills). Its [changelog](./bundles/matt-pocock/matt-pocock.changelog.md) records the bundle's releases. This is Greg's independent packaging, not an upstream publication. It does not change the Agent Toolkit bundle.
 
-The archive contains one composed skill, not independently selectable upstream skills. Its entry point directs interview requests through the personal [grill-interview-adapter](./personal/productivity/grill-interview-adapter/SKILL.md). The adapter loads `grilling` directly for `grill-me`, and both `grilling` and `domain-modeling` for `grill-with-docs`; the upstream files and formats remain unchanged. The documentation workflow needs access to the relevant project and files. Interactive questionnaires depend on host capabilities. Test both routing and behavior in the destination before expanding the selection.
+The archive contains one composed skill, not independently selectable upstream skills. Its entry point routes requests through the personal [matt-pocock-adapter](./personal/productivity/matt-pocock-adapter/SKILL.md). The adapter loads `grilling` for `grill-me`, both `grilling` and `domain-modeling` for `grill-with-docs`, and `to-spec` for specification requests. The upstream files and formats remain unchanged. Documentation workflows need access to the relevant project and files. Interactive questionnaires depend on host capabilities. Test routing and behavior in the destination.
 
 For each release:
 

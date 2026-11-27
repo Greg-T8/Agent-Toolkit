@@ -1,16 +1,17 @@
 ---
-name: grill-interview-adapter
-description: Apply Greg's interview and document preferences when using Matt Pocock's grill-me or grill-with-docs workflows across agent hosts.
+name: matt-pocock-adapter
+description: Apply Greg's interview and document preferences when using Matt Pocock's grill-me, grill-with-docs, or to-spec workflows across agent hosts.
 ---
 
-# Adapt Matt Pocock's interview workflows
+# Adapt Matt Pocock's workflows
 
-Use this guidance for requests to use `grill-me` or `grill-with-docs`, including requests to conduct their interviews. Follow the user's instructions and the host's higher-priority instructions. Preserve Matt's interview and domain-modeling methods except for the presentation and storage adaptations below.
+Use this guidance for requests to use `grill-me`, `grill-with-docs`, or `to-spec`, including requests to conduct their interviews or synthesize a specification. Follow the user's instructions and the host's higher-priority instructions. Preserve Matt's methods except for the presentation and storage adaptations below.
 
 ## Load upstream guidance
 
 - For `grill-me`, read and apply `grilling`.
 - For `grill-with-docs`, read and apply both `grilling` and `domain-modeling`, including the latter's glossary and ADR formats when needed.
+- For an explicit `to-spec` request, read and apply [to-spec](../to-spec/SKILL.md). Synthesize the conversation without an interview; its test-seam confirmation still applies.
 - In the composed bundle, the upstream skills are sibling directories under `references/skills/`: read [grilling](../grilling/SKILL.md) and [domain-modeling](../domain-modeling/SKILL.md) directly rather than assuming they are independently invocable. Their relative supporting links resolve from their own directories.
 - On another host, use installed upstream skills or accessible upstream files. If required guidance is unavailable, say what is missing and ask for access; do not invent its contents or claim it was applied.
 
@@ -29,3 +30,9 @@ Evaluate the submitted answers together. Identify conflicts, unresolved question
 For `grill-with-docs`, use the user's established authoritative artifacts and storage format. When native Google Docs are designated and accessible, read the existing glossary and ADRs, then maintain them using the upstream formats and criteria rather than assuming Markdown files are required. Update resolved glossary terms as the interview progresses; offer ADRs only when the upstream criteria are met. A confirmed interview decision does not by itself authorize implementing the plan.
 
 Read the implementation guide and tracker when relevant to ground decisions, and update them only within the user's requested scope. Use available connectors and report actual writes. If access or a required capability is unavailable, say what could not be applied and provide proposed text instead; do not claim that a document was updated.
+
+## Synthesize a specification
+
+For `to-spec`, inspect the relevant code and accessible authoritative glossary and ADRs, then propose test seams and confirm them with the user as the upstream workflow requires. Use the upstream spec template and distinguish confirmed decisions from unresolved points. Do not apply the interview rounds above to this workflow.
+
+Use the user's designated issue tracker and triage-label mapping when available. The upstream setup skill is not included in this bundle: if the tracker or label mapping is missing, ask for the missing details rather than directing the user to an unavailable command. Publish and apply the configured `ready-for-agent` label only within the user's authorized scope and host instructions. If the requested destination or capability is unavailable, provide the draft and report what remains unpublished.
