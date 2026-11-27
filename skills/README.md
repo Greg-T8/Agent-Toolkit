@@ -116,6 +116,32 @@ To build a different selection or choose another output directory and layout, ru
 ./skills/New-SkillArchive.ps1 -Format Skill -OutputDirectory ./release -Layout Folder
 ```
 
+## Release the Matt Pocock bundle
+
+The [Matt Pocock configuration](./bundles/matt-pocock.json) packages a small selection from the [upstream repository](https://github.com/mattpocock/skills). Its [changelog](./bundles/matt-pocock.changelog.md) records the bundle's releases. This is Greg's independent packaging, not an upstream publication. It does not change the Agent Toolkit bundle.
+
+The archive contains one composed skill, not independently selectable upstream skills. `grill-me` asks the host to invoke `grilling`; `grill-with-docs` asks it to invoke both `grilling` and `domain-modeling`. All four are included, along with the domain-modeling formats, but their presence does not prove that these invocations work in ChatGPT. The documentation workflow also needs access to the relevant project and files. Test these behaviors in the destination before expanding the selection.
+
+For each release:
+
+1. Inspect the upstream checkout's remote, commit, and working-tree status. Review upstream changes, licenses, skill dependencies, host requirements, and the proposed selection before updating to a chosen commit. Do not discard local changes. Exclude experimental skills unless they have been reviewed for the destination.
+2. Compare the previous local archive's manifest and embedded file hashes with the selected source files, licenses, and configuration. The archive is only the last local build, not evidence of the installed version. If it is missing or unreadable, state that the comparison is incomplete and use available Git history; never assume there were no changes.
+3. Update the bundle version and matching changelog before packaging. Use a new version whenever packaged content changes, even when the selection is unchanged. Describe additions, removals, moves, relevant upstream changes, and the selected upstream commit. Do not reuse a version already built with different content.
+4. Preview and build only this bundle with PowerShell 7:
+
+   ```powershell
+   # Validate the selection without creating an archive.
+   ./skills/New-SkillArchive.ps1 -ConfigPath ./skills/bundles/matt-pocock.json -WhatIf
+
+   # Package the reviewed Matt Pocock selection.
+   ./skills/New-SkillArchive.ps1 -ConfigPath ./skills/bundles/matt-pocock.json
+   ```
+
+5. Reopen `_bundles/matt-pocock.plugin.zip` and verify the root plugin manifest, bundle manifest, version, source commit and dirty status, selected files and hashes, license notices, and generated guidance and changelog. The shared packager's archive check is a structural check, not a ChatGPT import test.
+6. When ready to test in ChatGPT, import the archive and check discovery, `grill-me` invoking `grilling`, and `grill-with-docs` invoking both dependencies and using their glossary and ADR formats. Record which behaviors worked and any unavailable tools. Only add other engineering workflows after reviewing their setup, repository, issue-tracker, and tool requirements.
+
+The selection and version guard in `New-AgentToolkitBundle.ps1` applies only to the Agent Toolkit build. Custom bundles use the manual comparison and release checks above; `New-SkillArchive.ps1` does not enforce a version increase when content changes.
+
 ## Validation and provenance
 
 Before creating an archive, the packager validates the full selection and enumerates its files. It checks `SKILL.md` frontmatter delimiters and the required `name` and `description` fields. It accepts single-line scalar values or a block description; it does not validate all YAML syntax.
