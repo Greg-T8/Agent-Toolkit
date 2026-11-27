@@ -28,11 +28,11 @@ The build writes `_bundles/agent-toolkit.plugin.zip`. The `_bundles/` directory 
 
 The **Agent Toolkit** bundle combines technical documentation, editorial style, implementation planning, Google Workspace design, and coding guidance. Its selected skills and version are defined in [agent-toolkit.json](./bundles/agent-toolkit.json); its release history is in [agent-toolkit.changelog.md](./bundles/agent-toolkit.changelog.md). The shared document-and-checkmark icon identifies the combined workflow.
 
-The implementation-planning skill creates paired Word plans and native Google Sheets trackers, with stable identifiers, phase gates, and evidence-based progress. Its [source patterns](./personal/implementation-planning/references/source-patterns.md) retain links to examples without copying project documents. Word authoring and connected Google Sheets capabilities must also be available in the destination environment.
+The implementation-planning skill creates paired Word plans and native Google Sheets trackers, with stable identifiers, phase gates, and evidence-based progress. Its [source patterns](./personal/productivity/implementation-planning/references/source-patterns.md) retain links to examples without copying project documents. Word authoring and connected Google Sheets capabilities must also be available in the destination environment.
 
-The editorial-style skill is the house style for every piece of writing the bundle produces, including emails and messages. Its [decision register](./personal/editorial-style/references/decision-register.md) resolves the Microsoft Writing Style Guide, Google developer documentation style, plain-language guidance, and the Chicago Manual of Style into one set of rules, ranks above the community writing skills, and adds Greg's house rules. Its [`editorial_check.py`](./personal/editorial-style/scripts/editorial_check.py) checks Markdown and plain-text drafts, and the Google Docs audit runs the same checks.
+The editorial-style skill is the house style for every piece of writing the bundle produces, including emails and messages. Its [decision register](./personal/writing/editorial-style/references/decision-register.md) resolves the Microsoft Writing Style Guide, Google developer documentation style, plain-language guidance, and the Chicago Manual of Style into one set of rules, ranks above the community writing skills, and adds Greg's house rules. Its [`editorial_check.py`](./personal/writing/editorial-style/scripts/editorial_check.py) checks Markdown and plain-text drafts, and the Google Docs audit runs the same checks.
 
-The Google Workspace design skill applies only to native Google Docs and Sheets; it does not change the planning skill's Word default. Its [shared palette](./personal/google-workspace-design/references/palette.md), [Docs specification](./personal/google-workspace-design/references/docs-spec.md), and [Sheets specification](./personal/google-workspace-design/references/sheets-spec.md) define the fonts, colors, and components. The [master Doc](https://docs.google.com/document/d/1kIyDWS-94bJnd8DMOh0CyuT0KQCYLdX8f-RK_UPj5kY/edit) and [master tracker](https://docs.google.com/spreadsheets/d/1wqDjwWAfDV8x-0xfHKqttQSARyZORg2QpGeIzEgxdRw/edit) show the designs; both are in the [Agent Toolkit Templates folder](https://drive.google.com/drive/folders/1gm07fxx16bvRZuDfAH5idGONyFDXbZiw).
+The Google Workspace design skill applies only to native Google Docs and Sheets; it does not change the planning skill's Word default. Its [shared palette](./personal/documents/google-workspace-design/references/palette.md), [Docs specification](./personal/documents/google-workspace-design/references/docs-spec.md), and [Sheets specification](./personal/documents/google-workspace-design/references/sheets-spec.md) define the fonts, colors, and components. The [master Doc](https://docs.google.com/document/d/1kIyDWS-94bJnd8DMOh0CyuT0KQCYLdX8f-RK_UPj5kY/edit) and [master tracker](https://docs.google.com/spreadsheets/d/1wqDjwWAfDV8x-0xfHKqttQSARyZORg2QpGeIzEgxdRw/edit) show the designs; both are in the [Agent Toolkit Templates folder](https://drive.google.com/drive/folders/1gm07fxx16bvRZuDfAH5idGONyFDXbZiw).
 
 To discover the implementation-planning skill in local Codex, expose its physical source folder under `~/.agents/skills/implementation-planning`. A directory link keeps the maintained repository copy authoritative. Invoke it with `$implementation-planning`, for example: "Create a Word implementation plan and a Google Sheets task tracker for this project using its existing documents."
 
@@ -50,7 +50,7 @@ See [OpenAI's skills guidance](https://learn.chatgpt.com/docs/build-skills) for 
 
 ## Refresh coding guidance
 
-The unified build first refreshes the general, PowerShell, and Shell instruction copies in `personal/coding-guidelines/references`, then packages the skills selected in [agent-toolkit.json](./bundles/agent-toolkit.json). To refresh those embedded references without building an archive, run [Sync-CodingGuidelines.ps1](./Sync-CodingGuidelines.ps1). The lower-level [New-SkillArchive.ps1](./New-SkillArchive.ps1) uses the configured selections but does not refresh the instruction copies.
+The unified build first refreshes the general, PowerShell, and Shell instruction copies in `personal/code/coding-guidelines/references`, then packages the skills selected in [agent-toolkit.json](./bundles/agent-toolkit.json). To refresh those embedded references without building an archive, run [Sync-CodingGuidelines.ps1](./Sync-CodingGuidelines.ps1). The lower-level [New-SkillArchive.ps1](./New-SkillArchive.ps1) uses the configured selections but does not refresh the instruction copies.
 
 The build reports the output path, status, selected skill count, archive entry count, and file size. Rebuilding replaces the archive with the same bundle name and leaves other bundles in the output directory. Removing a skill from a configuration removes it from that bundle on the next successful build.
 
@@ -66,13 +66,24 @@ For example, this configuration selects two personal skills:
   "version": "0.1.0",
   "description": "Use for Azure infrastructure authoring and Mermaid architecture diagram styling.",
   "skills": [
-    "personal/bicep-azure",
-    "personal/mermaid-styling"
+    "personal/devops/bicep-azure",
+    "personal/design/mermaid-styling"
   ]
 }
 ```
 
 Skill paths are relative to the `skills/` directory, regardless of the configuration file's location. Each path must identify an exact physical skill directory under `personal/` or `community/`. The packager rejects wildcards, path traversal, and duplicate skill names. Each selected directory must contain a root `SKILL.md` whose `name` matches the directory name.
+
+Personal skills are grouped under their matching Skills Atlas theme folder:
+
+| Theme | Personal skills |
+| --- | --- |
+| `code` | `coding-guidelines` |
+| `design` | `mermaid-styling` |
+| `devops` | `bicep-azure`, `package-skill-bundles`, `terraform-ad-lab`, `terraform-azure` |
+| `documents` | `google-workspace-design` |
+| `productivity` | `implementation-planning` |
+| `writing` | `editorial-style`, `markdown-link-resolver` |
 
 Use lowercase letters, digits, and single hyphens for the bundle name; the name can contain up to 64 characters. Set the version to `major.minor.patch`. Write the description to describe the selected skills and trigger their use.
 
@@ -80,11 +91,11 @@ The following table shows example source paths:
 
 | Source | Selection path |
 | --- | --- |
-| Personal | `personal/bicep-azure` |
-| Personal | `personal/terraform-azure` |
-| Personal | `personal/terraform-ad-lab` |
-| Personal | `personal/mermaid-styling` |
-| Personal | `personal/markdown-link-resolver` |
+| Personal | `personal/devops/bicep-azure` |
+| Personal | `personal/devops/terraform-azure` |
+| Personal | `personal/devops/terraform-ad-lab` |
+| Personal | `personal/design/mermaid-styling` |
+| Personal | `personal/writing/markdown-link-resolver` |
 | Wondel.ai | `community/wondelai/technical-documentation` |
 | Matt Pocock | `community/mattpocock/skills/engineering/to-spec` |
 | Anthropic | `community/anthropic/skills/doc-coauthoring` |

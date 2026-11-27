@@ -2,8 +2,9 @@
 # Description   : Copy selected coding instructions into the personal skill
 # Context       : Agent-Toolkit - portable coding-guidelines skill bundle
 # Author        : Greg Tate & coding agent
-# Last Modified : 2026-11-25
+# Last Modified : 2026-11-27
 # Revision History:
+#   2026-11-27 - Follow Skills Atlas theme folders
 #   2026-11-25 - Initial version
 # ---------------------------------------------------------------------------
 <#
@@ -25,7 +26,7 @@ param()
 
 # Resolve the maintained instruction source and skill reference destination.
 $InstructionDirectory = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\instructions'))
-$ReferenceDirectory = Join-Path $PSScriptRoot 'personal\coding-guidelines\references'
+$ReferenceDirectory = Join-Path $PSScriptRoot 'personal\code\coding-guidelines\references'
 
 # Limit synchronization to the three requested instruction files.
 $InstructionFiles = @(
